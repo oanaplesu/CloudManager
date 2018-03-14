@@ -16,6 +16,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <meta-data android:name="com.google.android.apps.drive.APP_ID" android:value="id=488562405700" />
     </application>
 
 </manifest>
