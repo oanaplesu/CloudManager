@@ -20,6 +20,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -134,20 +135,22 @@ public class MainActivity extends AppCompatActivity
         item.setChecked(true);
     }
 
-    class UpdateNavigationMenuTask extends AsyncTask<Void, Boolean, List<String>> {
+    class UpdateNavigationMenuTask extends AsyncTask<Void, Boolean, Void> {
         private AppDatabase database;
+        List<String> googleAccounts;
+        List<String> dropboxAccounts;
 
         @Override
-        protected List<String> doInBackground(Void... args) {
+        protected Void doInBackground(Void... args) {
             database = AppDatabase.getDatabase(getApplicationContext());
+            googleAccounts = database.googleDriveUserDao().getAllAccounts();
+            dropboxAccounts = database.dropboxUserDao().getAllAccounts();
 
-            return database.googleDriveUserDao().getAllAccounts();
+            return null;
         }
 
         @Override
-        protected void onPostExecute(List<String> googleAccounts) {
-            super.onPostExecute(googleAccounts);
-
+        protected void onPostExecute(Void arg) {
             NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
             Menu navigationMenu = navigationView.getMenu();
             navigationMenu.clear();
@@ -155,6 +158,11 @@ public class MainActivity extends AppCompatActivity
             for(String account : googleAccounts) {
                 mNavigationMenu.add(R.id.google_drive_accounts,
                         Menu.NONE, Menu.NONE, account).setIcon(R.drawable.google_drive_icon);
+            }
+
+            for(String account : dropboxAccounts) {
+                mNavigationMenu.add(R.id.dropbox_accounts,
+                        Menu.NONE, Menu.NONE, account).setIcon(R.drawable.dropbox_icon_black);
             }
 
             mNavigationMenu.add(R.id.other_options, R.id.add_new_account,

@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.oanaplesu.cloudmanager">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -23,6 +25,19 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.dropbox.core.android.AuthActivity"
+            android:configChanges="orientation|keyboard"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <data android:scheme="db-2yh083j61l5n2ce" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
     </application>

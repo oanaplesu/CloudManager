@@ -1,13 +1,55 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.oanaplesu.cloudmanager.AddNewAccountFragment">
 
-   <TextView
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment"
-        tools:text="Hello" />
+        android:layout_height="match_parent">
 
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/linearLayout"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="59dp"
+            android:fontFamily="sans-serif"
+            android:padding="20dp"
+            android:text="Add a new accout"
+            android:textColor="@android:color/black"
+            android:textSize="24sp" />
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/googleSignInButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/google_icon"
+                android:paddingLeft="70dp"
+                android:paddingRight="70dp"
+                android:text="Sign In"
+                android:textAlignment="center" />
+
+            <Button
+                android:id="@+id/dropboxSignInButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/dropbox_icon"
+                android:paddingLeft="70dp"
+                android:paddingRight="70dp"
+                android:text="Sign In" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
 </FrameLayout>
