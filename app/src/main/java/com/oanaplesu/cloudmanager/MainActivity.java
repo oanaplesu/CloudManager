@@ -1,10 +1,15 @@
 package com.oanaplesu.cloudmanager;
 
+import android.arch.persistence.room.Update;
+import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,9 +20,16 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import db.AppDatabase;
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private Menu mNavigationMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +54,11 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        mNavigationMenu = navigationView.getMenu();
         navigationView.setNavigationItemSelectedListener(this);
+        getApplicationContext().deleteDatabase("userdatabase");
+
+        UpdateNavigationMenu();
     }
 
     @Override
@@ -57,16 +73,12 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -121,4 +133,37 @@ public class MainActivity extends AppCompatActivity
 
         item.setChecked(true);
     }
+
+    class UpdateNavigationMenuTask extends AsyncTask<Void, Boolean, List<String>> {
+        private AppDatabase database;
+
+        @Override
+        protected List<String> doInBackground(Void... args) {
+            database = AppDatabase.getDatabase(getApplicationContext());
+
+            return database.googleDriveUserDao().getAllAccounts();
+        }
+
+        @Override
+        protected void onPostExecute(List<String> googleAccounts) {
+            super.onPostExecute(googleAccounts);
+
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            Menu navigationMenu = navigationView.getMenu();
+            navigationMenu.clear();
+
+            for(String account : googleAccounts) {
+                mNavigationMenu.add(R.id.google_drive_accounts,
+                        Menu.NONE, Menu.NONE, account).setIcon(R.drawable.google_drive_icon);
+            }
+
+            mNavigationMenu.add(R.id.other_options, R.id.add_new_account,
+                    Menu.NONE, "Add new account").setIcon(R.drawable.add_icon);
+        }
+    }
+
+    public void UpdateNavigationMenu() {
+        new UpdateNavigationMenuTask().execute();
+    }
 }
+

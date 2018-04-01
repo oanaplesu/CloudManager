@@ -4,16 +4,11 @@
     tools:showIn="navigation_view">
 
     <group android:id="@+id/google_drive_accounts">
-
     </group>
 
     <group android:id="@+id/dropbox_accounts">
     </group>
 
     <group android:id="@+id/other_options">
-        <item
-            android:id="@+id/add_new_account"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Add new account" />
     </group>
 </menu>
