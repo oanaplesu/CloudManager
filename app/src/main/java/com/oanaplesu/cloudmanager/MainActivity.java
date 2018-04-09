@@ -102,11 +102,17 @@ public class MainActivity extends AppCompatActivity
         Bundle bundle = new Bundle();
 
         if (groupId == R.id.google_drive_accounts) {
-           // fragment = new FirstFragment();
-           // fragment.setArguments(bundle);
+            fragment = new FilesFragment();
+            bundle.putString("accountType", "google");
+            bundle.putString("accountEmail", item.toString());
+            bundle.putString("folderId", "");
+            fragment.setArguments(bundle);
         } else if (groupId == R.id.dropbox_accounts) {
-           // fragment = new FirstFragment();
-           // fragment.setArguments(bundle);
+            bundle.putString("accountType", "dropbox");
+            bundle.putString("accountEmail", item.toString());
+            bundle.putString("folderId", "");
+            fragment = new FilesFragment();
+            fragment.setArguments(bundle);
         } else {
             if (id == R.id.add_new_account) {
                 fragment = new AddNewAccountFragment();
@@ -135,7 +141,7 @@ public class MainActivity extends AppCompatActivity
         item.setChecked(true);
     }
 
-    class UpdateNavigationMenuTask extends AsyncTask<Void, Boolean, Void> {
+    class UpdateNavigationMenuTask extends AsyncTask<Void, Void, Void> {
         private AppDatabase database;
         List<String> googleAccounts;
         List<String> dropboxAccounts;
