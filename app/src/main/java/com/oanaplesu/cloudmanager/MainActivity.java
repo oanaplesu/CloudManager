@@ -19,18 +19,22 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageButton;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import db.AppDatabase;
+import db.GoogleDriveUser;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private Menu mNavigationMenu;
+    private final static int GOOGLE_ACCOUNT = 100;
+    private final static int DROPBOX_ACCOUNT = 200;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +61,7 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         mNavigationMenu = navigationView.getMenu();
         navigationView.setNavigationItemSelectedListener(this);
-        getApplicationContext().deleteDatabase("userdatabase");
+      //  getApplicationContext().deleteDatabase("userdatabase");
 
         UpdateNavigationMenu();
     }
@@ -103,12 +107,12 @@ public class MainActivity extends AppCompatActivity
 
         if (groupId == R.id.google_drive_accounts) {
             fragment = new FilesFragment();
-            bundle.putString("accountType", "google");
+            bundle.putInt("accountType", GOOGLE_ACCOUNT);
             bundle.putString("accountEmail", item.toString());
             bundle.putString("folderId", "");
             fragment.setArguments(bundle);
         } else if (groupId == R.id.dropbox_accounts) {
-            bundle.putString("accountType", "dropbox");
+            bundle.putInt("accountType", DROPBOX_ACCOUNT);
             bundle.putString("accountEmail", item.toString());
             bundle.putString("folderId", "");
             fragment = new FilesFragment();
