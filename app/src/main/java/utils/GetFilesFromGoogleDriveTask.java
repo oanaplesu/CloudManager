@@ -34,7 +34,7 @@ public class GetFilesFromGoogleDriveTask extends AsyncTask<String, Void, List<Cl
 
 
     public GetFilesFromGoogleDriveTask(GoogleAccountCredential credential,
-                                       ProgressDialog dialog, GetFilesCallback callback ) {
+                                       ProgressDialog dialog, GetFilesCallback callback) {
         this.credential = credential;
         this.mCallback = callback;
         this.mDialog = dialog;

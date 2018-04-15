@@ -1,12 +1,19 @@
 package com.oanaplesu.cloudmanager;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -29,13 +36,21 @@ import utils.CreateFolderCallback;
 import utils.CreateFolderDropboxTask;
 import utils.CreateFolderGoogleDriveTask;
 import utils.DropboxUniqueFolderNameException;
+import utils.FileAction;
 import utils.FilesAdapter;
 import utils.GetFilesCallback;
 import utils.GetFilesFromDropboxTask;
 import utils.GetFilesFromGoogleDriveTask;
+import utils.UploadFileCallback;
+import utils.UploadFileDropboxTask;
+import utils.UploadFileGoogleDriveTask;
+import utils.UriHelpers;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
+
+import static android.app.Activity.RESULT_OK;
 
 
 public class FilesFragment extends Fragment {
@@ -46,6 +61,7 @@ public class FilesFragment extends Fragment {
     private String folderId;
     private final static int GOOGLE_ACCOUNT = 100;
     private final static int DROPBOX_ACCOUNT = 200;
+    private static final int PICKFILE_REQUEST_CODE = 1;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -83,6 +99,14 @@ public class FilesFragment extends Fragment {
         filesList.setLayoutManager(new LinearLayoutManager(getActivity()));
         filesList.setAdapter(mFilesAdapter);
         registerForContextMenu(filesList);
+
+        FloatingActionButton fab = (FloatingActionButton) inflatedView.findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                performWithPermissions(FileAction.UPLOAD);
+            }
+        });
 
         return inflatedView;
     }
@@ -200,24 +224,22 @@ public class FilesFragment extends Fragment {
 
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-            String value = input.getText().toString();
+                String value = input.getText().toString();
 
-            if (accountType == GOOGLE_ACCOUNT) {
-                new CreateFolderGoogleDriveTask(
-                        getGoogleAccountCredential(),
-                        callback).execute(accountEmail, folderId, value);
-            } else if (accountType == DROPBOX_ACCOUNT) {
-                new CreateFolderDropboxTask(
-                        getDatabase(),
-                        callback).execute(accountEmail, folderId, value);
-            }
-
+                if (accountType == GOOGLE_ACCOUNT) {
+                    new CreateFolderGoogleDriveTask(
+                            getGoogleAccountCredential(),
+                            callback).execute(accountEmail, folderId, value);
+                } else if (accountType == DROPBOX_ACCOUNT) {
+                    new CreateFolderDropboxTask(
+                            getDatabase(),
+                            callback).execute(accountEmail, folderId, value);
+                }
             }
         });
 
         alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-
             }
         });
 
@@ -227,5 +249,119 @@ public class FilesFragment extends Fragment {
     private void refreshFrament() {
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.detach(this).attach(this).commit();
+    }
+
+    private void performWithPermissions(final FileAction action) {
+        if (hasPermissionsForAction(action)) {
+            performAction(action);
+            return;
+        }
+
+        if (shouldDisplayRationaleForAction(action)) {
+            new android.support.v7.app.AlertDialog.Builder(getContext())
+                    .setMessage("This app requires storage access to download and upload files.")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            requestPermissionsForAction(action);
+                        }
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .create()
+                    .show();
+        } else {
+            requestPermissionsForAction(action);
+        }
+    }
+
+    private boolean hasPermissionsForAction(FileAction action) {
+        for (String permission : action.getPermissions()) {
+            int result = ContextCompat.checkSelfPermission(getActivity(), permission);
+            if (result == PackageManager.PERMISSION_DENIED) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean shouldDisplayRationaleForAction(FileAction action) {
+        for (String permission : action.getPermissions()) {
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), permission)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void requestPermissionsForAction(FileAction action) {
+        ActivityCompat.requestPermissions(
+                getActivity(),
+                action.getPermissions(),
+                action.getCode()
+        );
+    }
+
+    private void performAction(FileAction action) {
+        switch(action) {
+            case UPLOAD:
+                launchFilePicker();
+                break;
+          /*  case DOWNLOAD:
+                if (mSelectedFile != null) {
+                    downloadFile(mSelectedFile);
+                } else {
+                    Log.e(TAG, "No file selected to download.");
+                }
+                break;*/
+
+        }
+    }
+
+    private void launchFilePicker() {
+        // Launch intent to pick file for upload
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(intent, PICKFILE_REQUEST_CODE);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICKFILE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                UploadFileCallback callback = new UploadFileCallback() {
+                    @Override
+                    public void onComplete() {
+                        refreshFrament();
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        Toast.makeText(getActivity(), "Failed to upload file",
+                                Toast.LENGTH_LONG).show();
+                    }
+                };
+
+                String fileUri = data.getData().toString();
+                File localFile = UriHelpers.getFileForUri(getContext(), Uri.parse(fileUri));
+                ProgressDialog dialog = new ProgressDialog(getContext());
+
+                if (accountType == GOOGLE_ACCOUNT) {
+                    new UploadFileGoogleDriveTask(
+                            getGoogleAccountCredential(),
+                            localFile,
+                            dialog,
+                            callback).execute(accountEmail, folderId);
+                } else if (accountType == DROPBOX_ACCOUNT) {
+                    new UploadFileDropboxTask(
+                            getDatabase(),
+                            localFile,
+                            dialog,
+                            callback).execute(accountEmail, folderId);
+                }
+            }
+        }
     }
 }
