@@ -8,4 +8,5 @@
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="app_key">2yh083j61l5n2ce</string>
+    <string name="delete_file">Delete</string>
 </resources>

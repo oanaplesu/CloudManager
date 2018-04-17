@@ -35,6 +35,9 @@ import utils.CloudResource;
 import utils.CreateFolderCallback;
 import utils.CreateFolderDropboxTask;
 import utils.CreateFolderGoogleDriveTask;
+import utils.DeleteFileCallback;
+import utils.DeleteFileDropboxTask;
+import utils.DeleteFileGoogleDriveTask;
 import utils.DropboxUniqueFolderNameException;
 import utils.FileAction;
 import utils.FilesAdapter;
@@ -69,8 +72,7 @@ public class FilesFragment extends Fragment {
         inflatedView = inflater.inflate(R.layout.fragment_files, container, false);
         setHasOptionsMenu(true);
 
-
-        loadFiles();
+        loadFiles("");
 
         RecyclerView filesList = (RecyclerView) inflatedView.findViewById(R.id.files_list);
         mFilesAdapter = new FilesAdapter(new FilesAdapter.Callback() {
@@ -87,12 +89,6 @@ public class FilesFragment extends Fragment {
                 FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
                 ft.replace(R.id.contentFrame, fragment);
                 ft.commit();
-            }
-
-            @Override
-            public void onFileClicked(final CloudResource file) {
-                // mSelectedFile = file;
-                //  performWithPermissions(FileAction.DOWNLOAD);
             }
         });
 
@@ -124,13 +120,18 @@ public class FilesFragment extends Fragment {
         Log.i("info", folderId);
     }
 
-    private void loadFiles() {
+    private void loadFiles(final String onCompleteMessage) {
         ProgressDialog dialog = new ProgressDialog(getContext());
 
         GetFilesCallback callback = new GetFilesCallback() {
             @Override
             public void onComplete(List<CloudResource> files) {
                 mFilesAdapter.setFiles(files);
+
+                if(!onCompleteMessage.isEmpty()) {
+                    Toast.makeText(getActivity(), onCompleteMessage,
+                            Toast.LENGTH_LONG).show();
+                }
             }
 
             @Override
@@ -160,16 +161,35 @@ public class FilesFragment extends Fragment {
     }
 
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        getActivity().getMenuInflater().inflate(R.menu.file_context_menu, menu);
-    }
-
-    @Override
     public boolean onContextItemSelected(MenuItem item) {
+        int position = mFilesAdapter.getPosition();
+        CloudResource file = mFilesAdapter.getFile(position);
         int id = item.getItemId();
 
         if (id == R.id.delete_file) {
+            DeleteFileCallback callback = new DeleteFileCallback() {
+                @Override
+                public void onComplete() {
+                    loadFiles("File deleted successfully");
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    Toast.makeText(getActivity(), "Failed to delete file",
+                            Toast.LENGTH_LONG).show();
+                }
+            };
+
+            if (accountType == GOOGLE_ACCOUNT) {
+                new DeleteFileGoogleDriveTask(
+                        getGoogleAccountCredential(),
+                        callback).execute(accountEmail, file.getId());
+            } else if (accountType == DROPBOX_ACCOUNT) {
+                new DeleteFileDropboxTask(
+                        getDatabase(),
+                        callback).execute(accountEmail, file.getId());
+            }
+
             return true;
         }
 
@@ -191,7 +211,7 @@ public class FilesFragment extends Fragment {
 
             return true;
         } else if(id == R.id.refresh_button) {
-            refreshFrament();
+            loadFiles("");
         }
 
         return super.onOptionsItemSelected(item);
@@ -207,7 +227,7 @@ public class FilesFragment extends Fragment {
         final CreateFolderCallback callback = new CreateFolderCallback() {
             @Override
             public void onComplete() {
-                refreshFrament();
+                loadFiles("Folder created successfully");
             }
 
             @Override
@@ -334,7 +354,7 @@ public class FilesFragment extends Fragment {
                 UploadFileCallback callback = new UploadFileCallback() {
                     @Override
                     public void onComplete() {
-                        refreshFrament();
+                        loadFiles("File uploaded successfully");
                     }
 
                     @Override
