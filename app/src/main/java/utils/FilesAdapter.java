@@ -42,8 +42,6 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.MetadataView
         return new MetadataViewHolder(view);
     }
 
-    private int i = 0;
-
     @Override
     public void onBindViewHolder(MetadataViewHolder metadataViewHolder, int i) {
         metadataViewHolder.bind(mFiles.get(i));
@@ -51,7 +49,7 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.MetadataView
 
     @Override
     public long getItemId(int position) {
-        return i++;
+        return mFiles.get(position).getId().hashCode();
     }
 
     @Override
