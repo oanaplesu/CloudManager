@@ -22,12 +22,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collections;
 
 import db.AppDatabase;
 
 public class UploadFileGoogleDriveTask extends AsyncTask<String, Void, Void> {
     private ProgressDialog mDialog;
-    private GoogleAccountCredential mCredential;
+    private Drive mService;
     private final UploadFileCallback mCallback;
     private Exception mException;
     private java.io.File mFile;
@@ -37,10 +38,10 @@ public class UploadFileGoogleDriveTask extends AsyncTask<String, Void, Void> {
     private final static String GOOGLE_DRIVE_ROOT_FOLDER = "root";
 
 
-    public UploadFileGoogleDriveTask(GoogleAccountCredential credential,
+    public UploadFileGoogleDriveTask(Drive service,
                                      java.io.File file, ProgressDialog dialog,
                                      UploadFileCallback callback) {
-        this.mCredential = credential;
+        this.mService = service;
         this.mCallback = callback;
         this.mFile = file;
         this.mDialog = dialog;
@@ -57,11 +58,6 @@ public class UploadFileGoogleDriveTask extends AsyncTask<String, Void, Void> {
         String accountEmail = args[0];
         String folderId = args[1].equals("") ? GOOGLE_DRIVE_ROOT_FOLDER : args[1];
 
-        mCredential.setSelectedAccountName(accountEmail);
-        Drive service = new Drive.Builder(AndroidHttp.newCompatibleTransport(),
-                new GsonFactory(), mCredential).build();
-
-
         if (mFile == null) {
             return null;
         }
@@ -72,12 +68,12 @@ public class UploadFileGoogleDriveTask extends AsyncTask<String, Void, Void> {
         body.setTitle(remoteFileName);
         String mimeType = CloudResource.getMimeTypeFromFileName(remoteFileName);
         body.setMimeType(mimeType);
-        body.setParents(Arrays.asList(new ParentReference().setId(folderId)));
+        body.setParents(Collections.singletonList(new ParentReference().setId(folderId)));
 
         FileContent mediaContent = new FileContent(mimeType, mFile);
 
         try {
-            service.files().insert(body, mediaContent).execute();
+            mService.files().insert(body, mediaContent).execute();
         } catch (IOException e) {
             System.out.println("An error occurred: " + e);
             return null;

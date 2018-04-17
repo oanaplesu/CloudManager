@@ -1,13 +1,17 @@
 package com.oanaplesu.cloudmanager;
 
+import android.Manifest;
 import android.arch.persistence.room.Update;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.View;
@@ -27,6 +31,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import db.AppDatabase;
 import db.GoogleDriveUser;
+import utils.GoogleDriveService;
 
 
 public class MainActivity extends AppCompatActivity
@@ -35,6 +40,8 @@ public class MainActivity extends AppCompatActivity
     private Menu mNavigationMenu;
     private final static int GOOGLE_ACCOUNT = 100;
     private final static int DROPBOX_ACCOUNT = 200;
+    private static final int MY_PERMISSIONS_REQUEST_GET_ACCOUNTS = 1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,11 +104,19 @@ public class MainActivity extends AppCompatActivity
         Bundle bundle = new Bundle();
 
         if (groupId == R.id.google_drive_accounts) {
-            fragment = new FilesFragment();
-            bundle.putInt("accountType", GOOGLE_ACCOUNT);
-            bundle.putString("accountEmail", item.toString());
-            bundle.putString("folderId", "");
-            fragment.setArguments(bundle);
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.GET_ACCOUNTS) != PackageManager.PERMISSION_GRANTED) {
+                item.setChecked(false);
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.GET_ACCOUNTS},
+                        MY_PERMISSIONS_REQUEST_GET_ACCOUNTS);
+            } else {
+                fragment = new FilesFragment();
+                bundle.putInt("accountType", GOOGLE_ACCOUNT);
+                bundle.putString("accountEmail", item.toString());
+                bundle.putString("folderId", "");
+                fragment.setArguments(bundle);
+            }
         } else if (groupId == R.id.dropbox_accounts) {
             bundle.putInt("accountType", DROPBOX_ACCOUNT);
             bundle.putString("accountEmail", item.toString());

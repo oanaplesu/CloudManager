@@ -24,7 +24,7 @@ import java.util.List;
 
 public class GetFilesFromGoogleDriveTask extends AsyncTask<String, Void, List<CloudResource>> {
     private ProgressDialog mDialog;
-    private GoogleAccountCredential credential;
+    private Drive mService;
     private final GetFilesCallback mCallback;
     private Exception mException;
 
@@ -33,9 +33,9 @@ public class GetFilesFromGoogleDriveTask extends AsyncTask<String, Void, List<Cl
     private final static String GOOGLE_DRIVE_ROOT_FOLDER = "root";
 
 
-    public GetFilesFromGoogleDriveTask(GoogleAccountCredential credential,
+    public GetFilesFromGoogleDriveTask(Drive service,
                                        ProgressDialog dialog, GetFilesCallback callback) {
-        this.credential = credential;
+        this.mService = service;
         this.mCallback = callback;
         this.mDialog = dialog;
     }
@@ -48,19 +48,14 @@ public class GetFilesFromGoogleDriveTask extends AsyncTask<String, Void, List<Cl
 
     @Override
     protected List<CloudResource> doInBackground(String... args) {
-        String accountEmail = args[0];
-        String folderId = args[1].equals("") ? GOOGLE_DRIVE_ROOT_FOLDER : args[1];
-
-        credential.setSelectedAccountName(accountEmail);
-        Drive service = new Drive.Builder(AndroidHttp.newCompatibleTransport(),
-                new GsonFactory(), credential).build();
+        String folderId = args[0].equals("") ? GOOGLE_DRIVE_ROOT_FOLDER : args[0];
 
         try {
-            ChildList driveFiles = service.children().list(folderId).execute();
+            ChildList driveFiles = mService.children().list(folderId).execute();
             ArrayList<CloudResource> files = new ArrayList<>();
 
             for(ChildReference fileReference : driveFiles.getItems()) {
-                File file = service.files().get(fileReference.getId()).execute();
+                File file = mService.files().get(fileReference.getId()).execute();
 
                 if (file.getMimeType().equals(GOOGLE_DRIVE_FOLDER_MIME_TYPE)) {
                     files.add(0, new CloudResource(
@@ -83,7 +78,7 @@ public class GetFilesFromGoogleDriveTask extends AsyncTask<String, Void, List<Cl
                 }
             }
 
-            File folder = service.files().get(folderId).execute();
+            File folder = mService.files().get(folderId).execute();
             String parentFolderId = folder.getParents().isEmpty()
                     ? "" :folder.getParents().get(0).getId();
 

@@ -17,7 +17,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,8 +26,8 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.services.drive.DriveScopes;
+import com.facebook.stetho.common.android.FragmentCompat;
+import com.google.api.services.drive.Drive;
 
 import db.AppDatabase;
 import utils.CloudResource;
@@ -44,13 +43,13 @@ import utils.FilesAdapter;
 import utils.GetFilesCallback;
 import utils.GetFilesFromDropboxTask;
 import utils.GetFilesFromGoogleDriveTask;
+import utils.GoogleDriveService;
 import utils.UploadFileCallback;
 import utils.UploadFileDropboxTask;
 import utils.UploadFileGoogleDriveTask;
 import utils.UriHelpers;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
@@ -60,11 +59,17 @@ public class FilesFragment extends Fragment {
     private View inflatedView;
     private FilesAdapter mFilesAdapter;
     private int accountType;
-    private String accountEmail;
+    private String mAccountEmail;
     private String folderId;
     private final static int GOOGLE_ACCOUNT = 100;
     private final static int DROPBOX_ACCOUNT = 200;
     private static final int PICKFILE_REQUEST_CODE = 1;
+
+
+    private AppDatabase getDatabase() {
+        return AppDatabase.getDatabase(getContext());
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -81,7 +86,7 @@ public class FilesFragment extends Fragment {
                 Fragment fragment = new FilesFragment();
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("accountType", accountType);
-                bundle.putString("accountEmail", accountEmail);
+                bundle.putString("accountEmail", mAccountEmail);
                 bundle.putString("folderId", folder.getId());
 
                 fragment.setArguments(bundle);
@@ -113,10 +118,10 @@ public class FilesFragment extends Fragment {
 
         Bundle bundle = this.getArguments();
         accountType = bundle.getInt("accountType");
-        accountEmail = bundle.getString("accountEmail");
+        mAccountEmail = bundle.getString("accountEmail");
         folderId = bundle.getString("folderId");
 
-        Log.i("info", accountEmail);
+        Log.i("info", mAccountEmail);
         Log.i("info", folderId);
     }
 
@@ -142,22 +147,13 @@ public class FilesFragment extends Fragment {
 
         if (accountType == GOOGLE_ACCOUNT) {
             new GetFilesFromGoogleDriveTask(
-                    getGoogleAccountCredential(),
-                    dialog, callback).execute(accountEmail, folderId);
+                    GoogleDriveService.get(getContext(), mAccountEmail),
+                    dialog, callback).execute(folderId);
         } else if (accountType == DROPBOX_ACCOUNT) {
             new GetFilesFromDropboxTask(
                     getDatabase(),
-                    dialog, callback).execute(accountEmail, folderId);
+                    dialog, callback).execute(mAccountEmail, folderId);
         }
-    }
-
-    private GoogleAccountCredential getGoogleAccountCredential() {
-        return GoogleAccountCredential.usingOAuth2(
-                getContext(), Collections.singleton(DriveScopes.DRIVE));
-    }
-
-    private AppDatabase getDatabase() {
-        return AppDatabase.getDatabase(getContext());
     }
 
     @Override
@@ -182,12 +178,12 @@ public class FilesFragment extends Fragment {
 
             if (accountType == GOOGLE_ACCOUNT) {
                 new DeleteFileGoogleDriveTask(
-                        getGoogleAccountCredential(),
-                        callback).execute(accountEmail, file.getId());
+                        GoogleDriveService.get(getContext(), mAccountEmail),
+                        callback).execute(file.getId());
             } else if (accountType == DROPBOX_ACCOUNT) {
                 new DeleteFileDropboxTask(
                         getDatabase(),
-                        callback).execute(accountEmail, file.getId());
+                        callback).execute(mAccountEmail, file.getId());
             }
 
             return true;
@@ -248,12 +244,12 @@ public class FilesFragment extends Fragment {
 
                 if (accountType == GOOGLE_ACCOUNT) {
                     new CreateFolderGoogleDriveTask(
-                            getGoogleAccountCredential(),
-                            callback).execute(accountEmail, folderId, value);
+                            GoogleDriveService.get(getContext(), mAccountEmail),
+                            callback).execute(folderId, value);
                 } else if (accountType == DROPBOX_ACCOUNT) {
                     new CreateFolderDropboxTask(
                             getDatabase(),
-                            callback).execute(accountEmail, folderId, value);
+                            callback).execute(mAccountEmail, folderId, value);
                 }
             }
         });
@@ -370,18 +366,20 @@ public class FilesFragment extends Fragment {
 
                 if (accountType == GOOGLE_ACCOUNT) {
                     new UploadFileGoogleDriveTask(
-                            getGoogleAccountCredential(),
+                            GoogleDriveService.get(getContext(), mAccountEmail),
                             localFile,
                             dialog,
-                            callback).execute(accountEmail, folderId);
+                            callback).execute(folderId);
                 } else if (accountType == DROPBOX_ACCOUNT) {
                     new UploadFileDropboxTask(
                             getDatabase(),
                             localFile,
                             dialog,
-                            callback).execute(accountEmail, folderId);
+                            callback).execute(mAccountEmail, folderId);
                 }
             }
         }
     }
+
+
 }

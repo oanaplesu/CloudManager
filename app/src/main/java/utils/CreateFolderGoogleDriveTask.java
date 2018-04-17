@@ -16,9 +16,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.ServiceConfigurationError;
 
 public class CreateFolderGoogleDriveTask extends AsyncTask<String, Void, Void> {
-    private GoogleAccountCredential mCredential;
+    private Drive mService;
     private CreateFolderCallback mCallback;
     private Exception mException;
 
@@ -27,21 +28,16 @@ public class CreateFolderGoogleDriveTask extends AsyncTask<String, Void, Void> {
     private final static String GOOGLE_DRIVE_ROOT_FOLDER = "root";
 
 
-    public CreateFolderGoogleDriveTask(GoogleAccountCredential credential,
+    public CreateFolderGoogleDriveTask(Drive service,
                                        CreateFolderCallback callback) {
-        this.mCredential = credential;
+        this.mService = service;
         this.mCallback = callback;
     }
 
     @Override
     protected Void doInBackground(String... args) {
-        String accountEmail = args[0];
-        String folderId = args[1].equals("") ? GOOGLE_DRIVE_ROOT_FOLDER : args[1];
-        String newFolderName = args[2];
-
-        mCredential.setSelectedAccountName(accountEmail);
-        Drive service = new Drive.Builder(AndroidHttp.newCompatibleTransport(),
-                new GsonFactory(), mCredential).build();
+        String folderId = args[0].equals("") ? GOOGLE_DRIVE_ROOT_FOLDER : args[0];
+        String newFolderName = args[1];
 
         File fileMetadata = new File();
         fileMetadata.setTitle(newFolderName);
@@ -50,7 +46,7 @@ public class CreateFolderGoogleDriveTask extends AsyncTask<String, Void, Void> {
             new ParentReference().setId(folderId)));
 
         try {
-            service.files().insert(fileMetadata)
+            mService.files().insert(fileMetadata)
                     .setFields("id, parents")
                     .execute();
         } catch (IOException e) {

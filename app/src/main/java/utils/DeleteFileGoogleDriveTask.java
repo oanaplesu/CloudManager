@@ -15,32 +15,23 @@ import java.util.Collections;
 import java.util.List;
 
 public class DeleteFileGoogleDriveTask extends AsyncTask<String, Void, Void> {
-    private GoogleAccountCredential mCredential;
+    private Drive mService;
     private DeleteFileCallback mCallback;
     private Exception mException;
 
-    private final static String GOOGLE_DRIVE_FOLDER_MIME_TYPE
-            = "application/vnd.google-apps.folder";
-    private final static String GOOGLE_DRIVE_ROOT_FOLDER = "root";
 
-
-    public DeleteFileGoogleDriveTask(GoogleAccountCredential credential,
+    public DeleteFileGoogleDriveTask(Drive service,
                                      DeleteFileCallback callback) {
-        this.mCredential = credential;
+        this.mService = service;
         this.mCallback = callback;
     }
 
     @Override
     protected Void doInBackground(String... args) {
-        String accountEmail = args[0];
-        String fileId = args[1];
-
-        mCredential.setSelectedAccountName(accountEmail);
-        Drive service = new Drive.Builder(AndroidHttp.newCompatibleTransport(),
-                new GsonFactory(), mCredential).build();
+        String fileId = args[0];
 
         try {
-            service.files().delete(fileId).execute();
+            mService.files().delete(fileId).execute();
         } catch (IOException e) {
             mException = e;
         }
