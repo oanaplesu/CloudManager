@@ -1,31 +1,28 @@
-package utils;
+package utils.tasks.google;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.os.AsyncTask;
-import android.widget.ArrayAdapter;
 
 
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.ChildList;
 import com.google.api.services.drive.model.ChildReference;
 import com.google.api.services.drive.model.File;
-import com.oanaplesu.cloudmanager.MainActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
+import utils.misc.CloudResource;
+import utils.services.CloudService;
+import utils.tasks.CloudRequestTask;
 
-public class GetFilesFromGoogleDriveTask extends AsyncTask<String, Void, List<CloudResource>> {
+
+public class GetFilesFromGoogleDriveTask extends AsyncTask<String, Void, List<CloudResource>>
+        implements CloudRequestTask {
     private ProgressDialog mDialog;
     private Drive mService;
-    private final GetFilesCallback mCallback;
+    private final CloudService.GetFilesCallback mCallback;
     private Exception mException;
 
     private final static String GOOGLE_DRIVE_FOLDER_MIME_TYPE
@@ -34,7 +31,8 @@ public class GetFilesFromGoogleDriveTask extends AsyncTask<String, Void, List<Cl
 
 
     public GetFilesFromGoogleDriveTask(Drive service,
-                                       ProgressDialog dialog, GetFilesCallback callback) {
+                                       ProgressDialog dialog,
+                                       CloudService.GetFilesCallback callback) {
         this.mService = service;
         this.mCallback = callback;
         this.mDialog = dialog;
@@ -112,5 +110,10 @@ public class GetFilesFromGoogleDriveTask extends AsyncTask<String, Void, List<Cl
         } else {
             mCallback.onComplete(files);
         }
+    }
+
+    @Override
+    public void executeTask(String... args) {
+        execute(args);
     }
 }

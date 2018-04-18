@@ -27,9 +27,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.Scope;
 import com.google.api.services.drive.DriveScopes;
 
-import db.AppDatabase;
-import db.DropboxUser;
-import db.GoogleDriveUser;
+import utils.db.AppDatabase;
+import utils.db.DropboxUser;
+import utils.db.GoogleDriveUser;
 
 
 public class AddNewAccountFragment extends Fragment {

@@ -1,45 +1,35 @@
-package utils;
+package utils.tasks.dropbox;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.os.AsyncTask;
 
 import com.dropbox.core.DbxException;
-import com.dropbox.core.DbxRequestConfig;
-import com.dropbox.core.http.OkHttp3Requestor;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
-import com.facebook.stetho.inspector.console.CLog;
-import com.google.api.services.drive.model.File;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import db.AppDatabase;
+import utils.misc.CloudResource;
+import utils.services.CloudService;
+import utils.tasks.CloudRequestTask;
 
 
-public class GetFilesFromDropboxTask extends AsyncTask<String, Void, ArrayList<CloudResource>> {
+public class GetFilesFromDropboxTask extends AsyncTask<String, Void, ArrayList<CloudResource>>
+        implements CloudRequestTask {
     private ProgressDialog mDialog;
-    private AppDatabase mDatabase;
-    private final GetFilesCallback mCallback;
+    private DbxClientV2 mDbxClient;
+    private final CloudService.GetFilesCallback mCallback;
     private Exception mException;
 
 
-    public GetFilesFromDropboxTask(AppDatabase database, ProgressDialog dialog,
-                                   GetFilesCallback callback) {
+    public GetFilesFromDropboxTask(DbxClientV2 dbxClient, ProgressDialog dialog,
+                                   CloudService.GetFilesCallback callback) {
         this.mCallback = callback;
-        this.mDatabase = database;
+        this.mDbxClient = dbxClient;
         this.mDialog = dialog;
-    }
-
-    private DbxClientV2 getDbxClient(String accesToken) {
-        DbxRequestConfig requestConfig = DbxRequestConfig.newBuilder("dropbox")
-                .withHttpRequestor(new OkHttp3Requestor(OkHttp3Requestor.defaultOkHttpClient()))
-                .build();
-        return new DbxClientV2(requestConfig, accesToken);
     }
 
     @Override
@@ -50,14 +40,10 @@ public class GetFilesFromDropboxTask extends AsyncTask<String, Void, ArrayList<C
 
     @Override
     protected ArrayList<CloudResource> doInBackground(String... args) {
-        String accountEmail = args[0];
-        String folderId = args[1];
-
-        String token = mDatabase.dropboxUserDao().getTokenForAccount(accountEmail);
-        DbxClientV2 dbxClient = getDbxClient(token);
+        String folderId = args[0];
 
         try {
-            ListFolderResult dropboxFiles = dbxClient.files().listFolder(folderId);
+            ListFolderResult dropboxFiles = mDbxClient.files().listFolder(folderId);
             ArrayList<CloudResource> files = new ArrayList<>();
 
             for(Metadata file : dropboxFiles.getEntries()) {
@@ -120,5 +106,10 @@ public class GetFilesFromDropboxTask extends AsyncTask<String, Void, ArrayList<C
         } else {
             mCallback.onComplete(files);
         }
+    }
+
+    @Override
+    public void executeTask(String... args) {
+        execute(args);
     }
 }

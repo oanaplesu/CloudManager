@@ -1,26 +1,22 @@
-package utils;
+package utils.tasks.google;
 
 
-import android.content.Context;
 import android.os.AsyncTask;
 
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.ServiceConfigurationError;
 
-public class CreateFolderGoogleDriveTask extends AsyncTask<String, Void, Void> {
+import utils.services.CloudService;
+import utils.tasks.CloudRequestTask;
+
+public class CreateFolderGoogleDriveTask extends AsyncTask<String, Void, Void>
+        implements CloudRequestTask {
     private Drive mService;
-    private CreateFolderCallback mCallback;
+    private CloudService.GenericCallback mCallback;
     private Exception mException;
 
     private final static String GOOGLE_DRIVE_FOLDER_MIME_TYPE
@@ -29,7 +25,7 @@ public class CreateFolderGoogleDriveTask extends AsyncTask<String, Void, Void> {
 
 
     public CreateFolderGoogleDriveTask(Drive service,
-                                       CreateFolderCallback callback) {
+                                       CloudService.GenericCallback callback) {
         this.mService = service;
         this.mCallback = callback;
     }
@@ -63,5 +59,10 @@ public class CreateFolderGoogleDriveTask extends AsyncTask<String, Void, Void> {
         } else {
             mCallback.onComplete();
         }
+    }
+
+    @Override
+    public void executeTask(String... args) {
+        execute(args);
     }
 }

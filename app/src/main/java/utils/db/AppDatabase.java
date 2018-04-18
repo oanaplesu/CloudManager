@@ -1,4 +1,4 @@
-package db;
+package utils.db;
 
 import android.content.Context;
 
@@ -21,6 +21,7 @@ public abstract class AppDatabase extends RoomDatabase {
                     Room.databaseBuilder(context, AppDatabase.class, "userdatabase")
                     //Room.inMemoryDatabaseBuilder(context.getApplicationContext(), AppDatabase.class)
                             // recreate the database if necessary
+                            .allowMainThreadQueries()
                             .fallbackToDestructiveMigration()
                             .build();
         }

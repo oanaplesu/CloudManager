@@ -1,20 +1,17 @@
-package utils;
+package utils.misc;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.oanaplesu.cloudmanager.R;
-
-import org.apache.http.impl.io.ContentLengthOutputStream;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -106,6 +103,8 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.MetadataView
         public void onClick(View v) {
             if (mItem.getType() == CloudResource.Type.FOLDER) {
                 mCallback.onFolderClicked(mItem);
+            } else {
+                v.setSelected(true);
             }
         }
 

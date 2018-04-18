@@ -1,6 +1,5 @@
 package com.oanaplesu.cloudmanager;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -26,28 +25,13 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.facebook.stetho.common.android.FragmentCompat;
-import com.google.api.services.drive.Drive;
-
-import db.AppDatabase;
-import utils.CloudResource;
-import utils.CreateFolderCallback;
-import utils.CreateFolderDropboxTask;
-import utils.CreateFolderGoogleDriveTask;
-import utils.DeleteFileCallback;
-import utils.DeleteFileDropboxTask;
-import utils.DeleteFileGoogleDriveTask;
-import utils.DropboxUniqueFolderNameException;
-import utils.FileAction;
-import utils.FilesAdapter;
-import utils.GetFilesCallback;
-import utils.GetFilesFromDropboxTask;
-import utils.GetFilesFromGoogleDriveTask;
-import utils.GoogleDriveService;
-import utils.UploadFileCallback;
-import utils.UploadFileDropboxTask;
-import utils.UploadFileGoogleDriveTask;
-import utils.UriHelpers;
+import utils.misc.CloudResource;
+import utils.services.CloudManager;
+import utils.services.CloudService;
+import utils.exceptions.DropboxUniqueFolderNameException;
+import utils.misc.FileAction;
+import utils.misc.FilesAdapter;
+import utils.misc.UriHelpers;
 
 import java.io.File;
 import java.util.List;
@@ -58,7 +42,7 @@ import static android.app.Activity.RESULT_OK;
 public class FilesFragment extends Fragment {
     private View inflatedView;
     private FilesAdapter mFilesAdapter;
-    private int accountType;
+    private int mAccountType;
     private String mAccountEmail;
     private String folderId;
     private final static int GOOGLE_ACCOUNT = 100;
@@ -66,10 +50,9 @@ public class FilesFragment extends Fragment {
     private static final int PICKFILE_REQUEST_CODE = 1;
 
 
-    private AppDatabase getDatabase() {
-        return AppDatabase.getDatabase(getContext());
+    private CloudService getService() {
+        return CloudManager.getService(getContext(), mAccountType, mAccountEmail);
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -85,7 +68,7 @@ public class FilesFragment extends Fragment {
             public void onFolderClicked(CloudResource folder) {
                 Fragment fragment = new FilesFragment();
                 Bundle bundle = new Bundle();
-                bundle.putSerializable("accountType", accountType);
+                bundle.putSerializable("accountType", mAccountType);
                 bundle.putString("accountEmail", mAccountEmail);
                 bundle.putString("folderId", folder.getId());
 
@@ -99,6 +82,7 @@ public class FilesFragment extends Fragment {
 
         filesList.setLayoutManager(new LinearLayoutManager(getActivity()));
         filesList.setAdapter(mFilesAdapter);
+
         registerForContextMenu(filesList);
 
         FloatingActionButton fab = (FloatingActionButton) inflatedView.findViewById(R.id.fab);
@@ -117,7 +101,7 @@ public class FilesFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         Bundle bundle = this.getArguments();
-        accountType = bundle.getInt("accountType");
+        mAccountType = bundle.getInt("accountType");
         mAccountEmail = bundle.getString("accountEmail");
         folderId = bundle.getString("folderId");
 
@@ -128,7 +112,7 @@ public class FilesFragment extends Fragment {
     private void loadFiles(final String onCompleteMessage) {
         ProgressDialog dialog = new ProgressDialog(getContext());
 
-        GetFilesCallback callback = new GetFilesCallback() {
+        getService().getFilesTask(dialog, new CloudService.GetFilesCallback() {
             @Override
             public void onComplete(List<CloudResource> files) {
                 mFilesAdapter.setFiles(files);
@@ -141,19 +125,10 @@ public class FilesFragment extends Fragment {
 
             @Override
             public void onError(Exception e) {
-                Toast.makeText(getActivity(), "Failed to load files", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "Failed to load files",
+                        Toast.LENGTH_LONG).show();
             }
-        };
-
-        if (accountType == GOOGLE_ACCOUNT) {
-            new GetFilesFromGoogleDriveTask(
-                    GoogleDriveService.get(getContext(), mAccountEmail),
-                    dialog, callback).execute(folderId);
-        } else if (accountType == DROPBOX_ACCOUNT) {
-            new GetFilesFromDropboxTask(
-                    getDatabase(),
-                    dialog, callback).execute(mAccountEmail, folderId);
-        }
+        }).executeTask(folderId);
     }
 
     @Override
@@ -163,7 +138,7 @@ public class FilesFragment extends Fragment {
         int id = item.getItemId();
 
         if (id == R.id.delete_file) {
-            DeleteFileCallback callback = new DeleteFileCallback() {
+            getService().deleteFileTask(new CloudService.GenericCallback() {
                 @Override
                 public void onComplete() {
                     loadFiles("File deleted successfully");
@@ -174,17 +149,7 @@ public class FilesFragment extends Fragment {
                     Toast.makeText(getActivity(), "Failed to delete file",
                             Toast.LENGTH_LONG).show();
                 }
-            };
-
-            if (accountType == GOOGLE_ACCOUNT) {
-                new DeleteFileGoogleDriveTask(
-                        GoogleDriveService.get(getContext(), mAccountEmail),
-                        callback).execute(file.getId());
-            } else if (accountType == DROPBOX_ACCOUNT) {
-                new DeleteFileDropboxTask(
-                        getDatabase(),
-                        callback).execute(mAccountEmail, file.getId());
-            }
+            }).executeTask(file.getId());
 
             return true;
         }
@@ -220,37 +185,27 @@ public class FilesFragment extends Fragment {
         final EditText input = new EditText(getContext());
         alert.setView(input);
 
-        final CreateFolderCallback callback = new CreateFolderCallback() {
-            @Override
-            public void onComplete() {
-                loadFiles("Folder created successfully");
-            }
-
-            @Override
-            public void onError(Exception e) {
-                if(e instanceof DropboxUniqueFolderNameException) {
-                    Toast.makeText(getActivity(), "A folder with this name already exists",
-                            Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(getActivity(), "Failed to create folder",
-                            Toast.LENGTH_LONG).show();
-                }
-            }
-        };
-
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 String value = input.getText().toString();
 
-                if (accountType == GOOGLE_ACCOUNT) {
-                    new CreateFolderGoogleDriveTask(
-                            GoogleDriveService.get(getContext(), mAccountEmail),
-                            callback).execute(folderId, value);
-                } else if (accountType == DROPBOX_ACCOUNT) {
-                    new CreateFolderDropboxTask(
-                            getDatabase(),
-                            callback).execute(mAccountEmail, folderId, value);
-                }
+                getService().createFolderTask(new CloudService.GenericCallback() {
+                    @Override
+                    public void onComplete() {
+                        loadFiles("Folder created successfully");
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        if(e instanceof DropboxUniqueFolderNameException) {
+                            Toast.makeText(getActivity(), "A folder with this name already exists",
+                                    Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(getActivity(), "Failed to create folder",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }).executeTask(folderId, value);
             }
         });
 
@@ -260,11 +215,6 @@ public class FilesFragment extends Fragment {
         });
 
         alert.show();
-    }
-
-    private void refreshFrament() {
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.detach(this).attach(this).commit();
     }
 
     private void performWithPermissions(final FileAction action) {
@@ -347,7 +297,11 @@ public class FilesFragment extends Fragment {
 
         if (requestCode == PICKFILE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                UploadFileCallback callback = new UploadFileCallback() {
+                String fileUri = data.getData().toString();
+                File localFile = UriHelpers.getFileForUri(getContext(), Uri.parse(fileUri));
+                ProgressDialog dialog = new ProgressDialog(getContext());
+
+                getService().uploadFileTask(localFile, dialog, new CloudService.GenericCallback() {
                     @Override
                     public void onComplete() {
                         loadFiles("File uploaded successfully");
@@ -358,25 +312,7 @@ public class FilesFragment extends Fragment {
                         Toast.makeText(getActivity(), "Failed to upload file",
                                 Toast.LENGTH_LONG).show();
                     }
-                };
-
-                String fileUri = data.getData().toString();
-                File localFile = UriHelpers.getFileForUri(getContext(), Uri.parse(fileUri));
-                ProgressDialog dialog = new ProgressDialog(getContext());
-
-                if (accountType == GOOGLE_ACCOUNT) {
-                    new UploadFileGoogleDriveTask(
-                            GoogleDriveService.get(getContext(), mAccountEmail),
-                            localFile,
-                            dialog,
-                            callback).execute(folderId);
-                } else if (accountType == DROPBOX_ACCOUNT) {
-                    new UploadFileDropboxTask(
-                            getDatabase(),
-                            localFile,
-                            dialog,
-                            callback).execute(mAccountEmail, folderId);
-                }
+                }).executeTask(folderId);
             }
         }
     }
