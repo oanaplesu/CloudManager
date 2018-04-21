@@ -2,4 +2,5 @@
 <resources>
     <item name="add_new_account" type="id"/>
     <item name="delete_file" type="id"/>
+    <item name="download_file" type="id"/>
 </resources>

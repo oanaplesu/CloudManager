@@ -20,8 +20,14 @@ public interface CloudService {
         void onError(Exception e);
     }
 
+    interface DownloadFileCallback {
+        void onComplete(File file);
+        void onError(Exception e);
+    }
+
     CloudRequestTask getFilesTask(ProgressDialog dialog, GetFilesCallback callback);
     CloudRequestTask createFolderTask(GenericCallback callback);
     CloudRequestTask deleteFileTask(GenericCallback callback);
     CloudRequestTask uploadFileTask(File file, ProgressDialog dialog, GenericCallback callback);
+    CloudRequestTask downloadFileTask(ProgressDialog dialog, DownloadFileCallback callback);
 }

@@ -14,6 +14,7 @@ import utils.db.AppDatabase;
 import utils.tasks.CloudRequestTask;
 import utils.tasks.dropbox.CreateFolderDropboxTask;
 import utils.tasks.dropbox.DeleteFileDropboxTask;
+import utils.tasks.dropbox.DownloadFileDropboxTask;
 import utils.tasks.dropbox.GetFilesFromDropboxTask;
 import utils.tasks.dropbox.UploadFileDropboxTask;
 
@@ -50,5 +51,10 @@ public class DropboxService implements CloudService {
     @Override
     public CloudRequestTask uploadFileTask(File file, ProgressDialog dialog, GenericCallback callback) {
         return new UploadFileDropboxTask(mService, file, dialog, callback);
+    }
+
+    @Override
+    public CloudRequestTask downloadFileTask(ProgressDialog dialog, DownloadFileCallback callback) {
+        return new DownloadFileDropboxTask(mService, dialog, callback);
     }
 }

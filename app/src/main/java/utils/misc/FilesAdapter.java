@@ -124,6 +124,8 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.MetadataView
             if(getAdapterPosition() != 0) {
                 contextMenu.add(Menu.NONE, R.id.delete_file,
                     0, R.string.delete_file);
+                contextMenu.add(Menu.NONE, R.id.download_file,
+                        0, R.string.download_file);
             }
         }
     }

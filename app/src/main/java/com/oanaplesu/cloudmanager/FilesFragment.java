@@ -1,18 +1,22 @@
 package com.oanaplesu.cloudmanager;
 
 import android.app.AlertDialog;
+import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -22,8 +26,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.dropbox.core.v2.files.FileMetadata;
 
 import utils.misc.CloudResource;
 import utils.services.CloudManager;
@@ -40,13 +47,12 @@ import static android.app.Activity.RESULT_OK;
 
 
 public class FilesFragment extends Fragment {
-    private View inflatedView;
+    private View mInflatedView;
     private FilesAdapter mFilesAdapter;
     private int mAccountType;
     private String mAccountEmail;
-    private String folderId;
-    private final static int GOOGLE_ACCOUNT = 100;
-    private final static int DROPBOX_ACCOUNT = 200;
+    private String mFolderId;
+    private CloudResource mSelectedFile;
     private static final int PICKFILE_REQUEST_CODE = 1;
 
 
@@ -57,12 +63,12 @@ public class FilesFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        inflatedView = inflater.inflate(R.layout.fragment_files, container, false);
+        mInflatedView = inflater.inflate(R.layout.fragment_files, container, false);
         setHasOptionsMenu(true);
 
         loadFiles("");
 
-        RecyclerView filesList = (RecyclerView) inflatedView.findViewById(R.id.files_list);
+        RecyclerView filesList = (RecyclerView) mInflatedView.findViewById(R.id.files_list);
         mFilesAdapter = new FilesAdapter(new FilesAdapter.Callback() {
             @Override
             public void onFolderClicked(CloudResource folder) {
@@ -85,7 +91,7 @@ public class FilesFragment extends Fragment {
 
         registerForContextMenu(filesList);
 
-        FloatingActionButton fab = (FloatingActionButton) inflatedView.findViewById(R.id.fab);
+        FloatingActionButton fab = (FloatingActionButton) mInflatedView.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -93,7 +99,7 @@ public class FilesFragment extends Fragment {
             }
         });
 
-        return inflatedView;
+        return mInflatedView;
     }
 
     @Override
@@ -103,10 +109,7 @@ public class FilesFragment extends Fragment {
         Bundle bundle = this.getArguments();
         mAccountType = bundle.getInt("accountType");
         mAccountEmail = bundle.getString("accountEmail");
-        folderId = bundle.getString("folderId");
-
-        Log.i("info", mAccountEmail);
-        Log.i("info", folderId);
+        mFolderId = bundle.getString("folderId");
     }
 
     private void loadFiles(final String onCompleteMessage) {
@@ -128,7 +131,7 @@ public class FilesFragment extends Fragment {
                 Toast.makeText(getActivity(), "Failed to load files",
                         Toast.LENGTH_LONG).show();
             }
-        }).executeTask(folderId);
+        }).executeTask(mFolderId);
     }
 
     @Override
@@ -150,6 +153,11 @@ public class FilesFragment extends Fragment {
                             Toast.LENGTH_LONG).show();
                 }
             }).executeTask(file.getId());
+
+            return true;
+        } else if(id == R.id.download_file) {
+            mSelectedFile = file;
+            performWithPermissions(FileAction.DOWNLOAD);
 
             return true;
         }
@@ -205,7 +213,7 @@ public class FilesFragment extends Fragment {
                                     Toast.LENGTH_LONG).show();
                         }
                     }
-                }).executeTask(folderId, value);
+                }).executeTask(mFolderId, value);
             }
         });
 
@@ -272,13 +280,11 @@ public class FilesFragment extends Fragment {
             case UPLOAD:
                 launchFilePicker();
                 break;
-          /*  case DOWNLOAD:
+            case DOWNLOAD:
                 if (mSelectedFile != null) {
                     downloadFile(mSelectedFile);
-                } else {
-                    Log.e(TAG, "No file selected to download.");
                 }
-                break;*/
+                break;
 
         }
     }
@@ -312,10 +318,60 @@ public class FilesFragment extends Fragment {
                         Toast.makeText(getActivity(), "Failed to upload file",
                                 Toast.LENGTH_LONG).show();
                     }
-                }).executeTask(folderId);
+                }).executeTask(mFolderId);
             }
         }
     }
 
+    private void viewFileInExternalApp(File result) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        MimeTypeMap mime = MimeTypeMap.getSingleton();
+        String ext = result.getName().substring(result.getName().indexOf(".") + 1);
+        String type = mime.getMimeTypeFromExtension(ext);
+
+        Uri apkURI = FileProvider.getUriForFile(
+                getActivity(),
+                getContext()
+                        .getPackageName() + ".provider", result);
+        intent.setDataAndType(apkURI, type);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        PackageManager manager = getActivity().getPackageManager();
+        List<ResolveInfo> resolveInfo = manager.queryIntentActivities(intent, 0);
+        if (resolveInfo.size() > 0) {
+            startActivity(intent);
+        } else {
+            intent = new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS);
+            startActivity(intent);
+        }
+
+    }
+
+    private void downloadFile(CloudResource file) {
+        ProgressDialog dialog = new ProgressDialog(getContext());
+
+        getService().downloadFileTask(dialog, new CloudService.DownloadFileCallback() {
+            @Override
+            public void onComplete(final File file) {
+                Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                intent.setData(Uri.fromFile(file));
+                getContext().sendBroadcast(intent);
+                Snackbar mySnackbar = Snackbar.make(mInflatedView, "Download complete", Snackbar.LENGTH_INDEFINITE);
+                mySnackbar.setAction("Open", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        viewFileInExternalApp(file);
+                    }
+                });
+                mySnackbar.show();
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Toast.makeText(getActivity(), "Failed to download file",
+                        Toast.LENGTH_LONG).show();
+            }
+        }).executeTask(file.getId(), file.getName());
+    }
 
 }

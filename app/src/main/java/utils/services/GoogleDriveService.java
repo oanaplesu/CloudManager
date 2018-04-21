@@ -14,6 +14,7 @@ import java.io.File;
 import java.util.Collections;
 
 import utils.tasks.google.DeleteFileGoogleDriveTask;
+import utils.tasks.google.DownloadFileGoogleDriveTask;
 import utils.tasks.google.GetFilesFromGoogleDriveTask;
 import utils.tasks.CloudRequestTask;
 import utils.tasks.google.CreateFolderGoogleDriveTask;
@@ -49,5 +50,10 @@ public class GoogleDriveService implements CloudService {
     @Override
     public CloudRequestTask uploadFileTask(File file, ProgressDialog dialog, GenericCallback callback) {
         return new UploadFileGoogleDriveTask(mService, file, dialog, callback);
+    }
+
+    @Override
+    public CloudRequestTask downloadFileTask(ProgressDialog dialog, DownloadFileCallback callback) {
+        return new DownloadFileGoogleDriveTask(mService, dialog, callback);
     }
 }
