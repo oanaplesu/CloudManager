@@ -19,7 +19,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,14 +29,12 @@ import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.dropbox.core.v2.files.FileMetadata;
-
-import utils.misc.CloudResource;
+import utils.cloud.CloudResource;
 import utils.services.CloudManager;
 import utils.services.CloudService;
 import utils.exceptions.DropboxUniqueFolderNameException;
 import utils.misc.FileAction;
-import utils.misc.FilesAdapter;
+import utils.adapters.FilesAdapter;
 import utils.misc.UriHelpers;
 
 import java.io.File;
@@ -66,8 +63,6 @@ public class FilesFragment extends Fragment {
         mInflatedView = inflater.inflate(R.layout.fragment_files, container, false);
         setHasOptionsMenu(true);
 
-        loadFiles("");
-
         RecyclerView filesList = (RecyclerView) mInflatedView.findViewById(R.id.files_list);
         mFilesAdapter = new FilesAdapter(new FilesAdapter.Callback() {
             @Override
@@ -88,6 +83,8 @@ public class FilesFragment extends Fragment {
 
         filesList.setLayoutManager(new LinearLayoutManager(getActivity()));
         filesList.setAdapter(mFilesAdapter);
+
+        loadFiles("");
 
         registerForContextMenu(filesList);
 

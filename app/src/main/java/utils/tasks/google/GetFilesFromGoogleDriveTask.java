@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import utils.misc.CloudResource;
+import utils.cloud.CloudResource;
 import utils.services.CloudService;
 import utils.tasks.CloudRequestTask;
 

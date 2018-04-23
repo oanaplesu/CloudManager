@@ -45,7 +45,7 @@ public class DownloadFileGoogleDriveTask extends AsyncTask<String, Void, File>
     protected File doInBackground(String... args) {
         String fileId = args[0];
         String fileName = args[1];
-        
+
         File path = Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOWNLOADS);
         File file = new File(path, fileName);

@@ -13,7 +13,7 @@ import com.google.api.services.drive.model.ParentReference;
 import java.io.IOException;
 import java.util.Collections;
 
-import utils.misc.CloudResource;
+import utils.cloud.CloudResource;
 import utils.services.CloudService;
 import utils.tasks.CloudRequestTask;
 

@@ -12,7 +12,7 @@ import com.dropbox.core.v2.files.Metadata;
 
 import java.util.ArrayList;
 
-import utils.misc.CloudResource;
+import utils.cloud.CloudResource;
 import utils.services.CloudService;
 import utils.tasks.CloudRequestTask;
 

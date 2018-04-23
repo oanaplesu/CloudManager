@@ -24,6 +24,11 @@ public interface GoogleDriveUserDao {
     @Query("delete from GoogleDriveUser")
     void removeAllUsers();
 
+    @Query("delete from GoogleDriveUser where account like :account")
+    void removeUser(String account);
+
     @Query("select * from googledriveuser where account like :account")
     public GoogleDriveUser getUserByAccount(String account);
+
+
 }

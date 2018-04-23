@@ -24,6 +24,9 @@ public interface DropboxUserDao {
     @Query("delete from dropboxuser")
     void removeAllUsers();
 
+    @Query("delete from dropboxuser where account like :account")
+    void removeUser(String account);
+
     @Query("select token from dropboxuser where account like :account")
     public String getTokenForAccount(String account);
 }

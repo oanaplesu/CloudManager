@@ -1,7 +1,6 @@
-package utils.misc;
+package utils.adapters;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -16,6 +15,8 @@ import com.oanaplesu.cloudmanager.R;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import utils.cloud.CloudResource;
 
 
 public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.MetadataViewHolder> {

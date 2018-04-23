@@ -6,7 +6,7 @@ import android.app.ProgressDialog;
 import java.io.File;
 import java.util.List;
 
-import utils.misc.CloudResource;
+import utils.cloud.CloudResource;
 import utils.tasks.CloudRequestTask;
 
 public interface CloudService {

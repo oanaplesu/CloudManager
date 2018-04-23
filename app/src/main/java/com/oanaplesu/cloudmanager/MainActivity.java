@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity
     private Menu mNavigationMenu;
     private final static int GOOGLE_ACCOUNT = 100;
     private final static int DROPBOX_ACCOUNT = 200;
-    private static final int MY_PERMISSIONS_REQUEST_GET_ACCOUNTS = 1;
+    public static final int MY_PERMISSIONS_REQUEST_GET_ACCOUNTS = 1;
 
 
     @Override
@@ -50,6 +50,11 @@ public class MainActivity extends AppCompatActivity
       //  getApplicationContext().deleteDatabase("userdatabase");
 
         UpdateNavigationMenu();
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.contentFrame, new AccountsFragment());
+        ft.commit();
+
     }
 
     @Override
@@ -83,7 +88,7 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-       checkSelectedMenuItem(item);
+       checkSelectedMenuItem(item.getTitle());
 
         int id = item.getItemId();
         int groupId = item.getGroupId();
@@ -111,10 +116,16 @@ public class MainActivity extends AppCompatActivity
             bundle.putString("folderId", "");
             fragment = new FilesFragment();
             fragment.setArguments(bundle);
-        } else {
-            if (id == R.id.add_new_account) {
-                fragment = new AddNewAccountFragment();
+        } else if(groupId == R.id.other_options){
+            switch(id) {
+                case R.id.add_new_account:
+                    fragment = new AddNewAccountFragment();
+                    break;
+                case R.id.settings:
+                    fragment = new AccountsFragment();
+                    break;
             }
+
         }
 
         if (fragment != null) {
@@ -128,15 +139,17 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private void checkSelectedMenuItem(MenuItem item) {
+    public void checkSelectedMenuItem(CharSequence tabName) {
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         Menu nav_menu = navigationView.getMenu();
 
         for (int i = 0; i < nav_menu.size(); i++) {
-            nav_menu.getItem(i).setChecked(false);
+            if(nav_menu.getItem(i).getTitle().equals(tabName)) {
+                nav_menu.getItem(i).setChecked(true);
+            } else {
+                nav_menu.getItem(i).setChecked(false);
+            }
         }
-
-        item.setChecked(true);
     }
 
     class UpdateNavigationMenuTask extends AsyncTask<Void, Void, Void> {
@@ -171,6 +184,9 @@ public class MainActivity extends AppCompatActivity
 
             mNavigationMenu.add(R.id.other_options, R.id.add_new_account,
                     Menu.NONE, "Add new account").setIcon(R.drawable.add_icon);
+
+            mNavigationMenu.add(R.id.other_options, R.id.settings,
+                    Menu.NONE, "Settings").setIcon(R.drawable.settings_icon);
         }
     }
 
