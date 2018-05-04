@@ -2,6 +2,8 @@ package com.oanaplesu.cloudmanager;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -20,13 +22,13 @@ import android.view.MenuItem;
 import java.util.List;
 
 import utils.cloud.AccountType;
-import utils.cloud.CloudResource;
 import utils.db.AppDatabase;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private Menu mNavigationMenu;
+    private Toolbar mToolbar;
     public static final int MY_PERMISSIONS_REQUEST_GET_ACCOUNTS = 1;
 
 
@@ -34,12 +36,12 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
@@ -53,7 +55,6 @@ public class MainActivity extends AppCompatActivity
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.contentFrame, new AccountsFragment());
         ft.commit();
-
     }
 
     @Override
@@ -103,15 +104,15 @@ public class MainActivity extends AppCompatActivity
                         MY_PERMISSIONS_REQUEST_GET_ACCOUNTS);
             } else {
                 fragment = new FilesFragment();
-                bundle.putInt("accountType", AccountType.GOOGLE_DRIVE.ordinal());
-                bundle.putString("accountEmail", item.toString());
-                bundle.putString("folderId", "");
+                bundle.putInt(getString(R.string.account_type), AccountType.GOOGLE_DRIVE.ordinal());
+                bundle.putString(getString(R.string.account_email), item.toString());
+                bundle.putString(getString(R.string.folder_id), "");
                 fragment.setArguments(bundle);
             }
         } else if (groupId == R.id.dropbox_accounts) {
-            bundle.putInt("accountType", AccountType.DROPBOX.ordinal());
-            bundle.putString("accountEmail", item.toString());
-            bundle.putString("folderId", "");
+            bundle.putInt(getString(R.string.account_type), AccountType.DROPBOX.ordinal());
+            bundle.putString(getString(R.string.account_email), item.toString());
+            bundle.putString(getString(R.string.folder_id), "");
             fragment = new FilesFragment();
             fragment.setArguments(bundle);
         } else if(groupId == R.id.other_options){
@@ -123,7 +124,6 @@ public class MainActivity extends AppCompatActivity
                     fragment = new AccountsFragment();
                     break;
             }
-
         }
 
         if (fragment != null) {
@@ -146,6 +146,34 @@ public class MainActivity extends AppCompatActivity
 
             if(menuItem.getTitle().equals(tabName)
                     && menuItem.getGroupId() == groupId) {
+
+                int mainColor = getResources().getColor(R.color.colorPrimary);
+                switch(groupId) {
+                    case R.id.google_drive_accounts:
+                        mainColor = getResources().getColor(R.color.colorGoogleDrive);
+                        break;
+                    case R.id.dropbox_accounts:
+                        mainColor = getResources().getColor(R.color.colorDropbox);
+                        break;
+                    default:
+                        break;
+                }
+                mToolbar.setBackgroundColor(mainColor);
+                mToolbar.setTitle(tabName);
+
+                ColorStateList colorStateList = new ColorStateList(
+                    new int[][]{
+                            new int[]{android.R.attr.state_checked},
+                            new int[]{}
+                    },
+                    new int[] {
+                            mainColor,
+                            Color.BLACK
+                    }
+                );
+                navigationView.setItemTextColor(colorStateList);
+                navigationView.setItemIconTintList(colorStateList);
+
                 menuItem.setChecked(true);
             } else {
                 menuItem.setChecked(false);

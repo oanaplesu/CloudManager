@@ -19,7 +19,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -47,7 +46,6 @@ import java.util.List;
 import java.util.Locale;
 
 import static android.app.Activity.RESULT_OK;
-import static android.support.v4.app.ActivityCompat.invalidateOptionsMenu;
 import static android.view.MenuItem.SHOW_AS_ACTION_ALWAYS;
 
 
@@ -88,9 +86,9 @@ public class FilesFragment extends Fragment {
             public void onFolderClicked(CloudResource folder) {
                 Fragment fragment = new FilesFragment();
                 Bundle bundle = new Bundle();
-                bundle.putSerializable("accountType", mAccountType);
-                bundle.putString("accountEmail", mAccountEmail);
-                bundle.putString("folderId", folder.getId());
+                bundle.putInt(getString(R.string.account_type), mAccountType);
+                bundle.putString(getString(R.string.account_email), mAccountEmail);
+                bundle.putString(getString(R.string.folder_id), folder.getId());
 
                 fragment.setArguments(bundle);
 
@@ -123,9 +121,9 @@ public class FilesFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         Bundle bundle = this.getArguments();
-        mAccountType = bundle.getInt("accountType");
-        mAccountEmail = bundle.getString("accountEmail");
-        mFolderId = bundle.getString("folderId");
+        mAccountType = bundle.getInt(getString(R.string.account_type));
+        mAccountEmail = bundle.getString(getString(R.string.account_email));
+        mFolderId = bundle.getString(getString(R.string.folder_id));
     }
 
     private void loadFiles(final String onCompleteMessage) {
@@ -144,7 +142,7 @@ public class FilesFragment extends Fragment {
 
             @Override
             public void onError(Exception e) {
-                Toast.makeText(getActivity(), "Failed to load files",
+                Toast.makeText(getActivity(), R.string.load_files_failed,
                         Toast.LENGTH_LONG).show();
             }
         }).executeTask(mFolderId);
@@ -160,12 +158,12 @@ public class FilesFragment extends Fragment {
             getService().deleteFileTask(new CloudService.GenericCallback() {
                 @Override
                 public void onComplete() {
-                    loadFiles("File deleted successfully");
+                    loadFiles(getString(R.string.file_delete_success));
                 }
 
                 @Override
                 public void onError(Exception e) {
-                    Toast.makeText(getActivity(), "Failed to delete file",
+                    Toast.makeText(getActivity(), R.string.file_delete_failed,
                             Toast.LENGTH_LONG).show();
                 }
             }).executeTask(file.getId());
@@ -200,8 +198,6 @@ public class FilesFragment extends Fragment {
             menu.add(Menu.NONE, R.id.paste_file, 2, R.string.paste_file);
         }
 
-        Log.i("aici", "created menu");
-
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -225,7 +221,7 @@ public class FilesFragment extends Fragment {
 
     private void moveSavedFile() {
         if(mSavedFile == null) {
-            Toast.makeText(getActivity(), "An error occurred. Try again",
+            Toast.makeText(getActivity(), R.string.generic_error,
                     Toast.LENGTH_LONG).show();
             return;
         }
@@ -272,23 +268,23 @@ public class FilesFragment extends Fragment {
         final EditText input = new EditText(getContext());
         alert.setView(input);
 
-        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+        alert.setPositiveButton(R.string.ok_button, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 String value = input.getText().toString();
 
                 getService().createFolderTask(new CloudService.CreateFolderCallback() {
                     @Override
                     public void onComplete(CloudResource createdFolder) {
-                        loadFiles("Folder created successfully");
+                        loadFiles(getString(R.string.create_folder_success));
                     }
 
                     @Override
                     public void onError(Exception e) {
                         if(e instanceof DropboxUniqueFolderNameException) {
-                            Toast.makeText(getActivity(), "A folder with this name already exists",
+                            Toast.makeText(getActivity(), R.string.duplicate_folder_name_error,
                                     Toast.LENGTH_LONG).show();
                         } else {
-                            Toast.makeText(getActivity(), "Failed to create folder",
+                            Toast.makeText(getActivity(), R.string.create_folder_failed,
                                     Toast.LENGTH_LONG).show();
                         }
                     }
@@ -296,7 +292,7 @@ public class FilesFragment extends Fragment {
             }
         });
 
-        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        alert.setNegativeButton(R.string.cancel_button, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
             }
         });
@@ -312,14 +308,14 @@ public class FilesFragment extends Fragment {
 
         if (shouldDisplayRationaleForAction(action)) {
             new android.support.v7.app.AlertDialog.Builder(getContext())
-                    .setMessage("This app requires storage access to download and upload files.")
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    .setMessage(R.string.permissions_rationale)
+                    .setPositiveButton(R.string.ok_button, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             requestPermissionsForAction(action);
                         }
                     })
-                    .setNegativeButton("Cancel", null)
+                    .setNegativeButton(R.string.cancel_button, null)
                     .create()
                     .show();
         } else {
@@ -339,7 +335,8 @@ public class FilesFragment extends Fragment {
 
     private boolean shouldDisplayRationaleForAction(FileAction action) {
         for (String permission : action.getPermissions()) {
-            if (!ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), permission)) {
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(
+                    getActivity(), permission)) {
                 return true;
             }
         }
@@ -388,12 +385,12 @@ public class FilesFragment extends Fragment {
                 getService().uploadFileTask(localFile, dialog, new CloudService.GenericCallback() {
                     @Override
                     public void onComplete() {
-                        loadFiles("File uploaded successfully");
+                        loadFiles(getString(R.string.file_upload_success));
                     }
 
                     @Override
                     public void onError(Exception e) {
-                        Toast.makeText(getActivity(), "Failed to upload file",
+                        Toast.makeText(getActivity(), R.string.file_upload_failed,
                                 Toast.LENGTH_LONG).show();
                     }
                 }).executeTask(mFolderId, localFile.getName());
@@ -422,7 +419,6 @@ public class FilesFragment extends Fragment {
             intent = new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS);
             startActivity(intent);
         }
-
     }
 
     private void downloadFile(CloudResource file) {
@@ -434,7 +430,7 @@ public class FilesFragment extends Fragment {
                 Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                 intent.setData(Uri.fromFile(file));
                 getContext().sendBroadcast(intent);
-                Snackbar mySnackbar = Snackbar.make(mInflatedView, "Download complete", Snackbar.LENGTH_INDEFINITE);
+                Snackbar mySnackbar = Snackbar.make(mInflatedView, R.string.file_dowload_success, Snackbar.LENGTH_INDEFINITE);
                 mySnackbar.setAction("Open", new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -446,10 +442,9 @@ public class FilesFragment extends Fragment {
 
             @Override
             public void onError(Exception e) {
-                Toast.makeText(getActivity(), "Failed to download file",
+                Toast.makeText(getActivity(), R.string.file_download_failed,
                         Toast.LENGTH_LONG).show();
             }
         }).executeTask(file.getId(), file.getName());
     }
-
 }
