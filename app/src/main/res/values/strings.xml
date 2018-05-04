@@ -15,4 +15,21 @@
     <string name="paste_file">Paste</string>
     <string name="refresh">Refresh</string>
     <string name="create_folder">Create folder</string>
+    <string name="account_type">accountType</string>
+    <string name="account_email">accountEmail</string>
+    <string name="folder_id">folderId</string>
+    <string name="load_files_failed">Failed to load files</string>
+    <string name="file_delete_success">File deleted successfully</string>
+    <string name="file_delete_failed">Failed to delete file</string>
+    <string name="generic_error">An error has occured. Try again</string>
+    <string name="ok_button">Ok</string>
+    <string name="create_folder_success">Folder created sucessfully</string>
+    <string name="duplicate_folder_name_error">Folder names must be unique</string>
+    <string name="create_folder_failed">Failed to create folder</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="permissions_rationale">This app requires storage access to download and upload files.</string>
+    <string name="file_upload_success">File uploaded successfully</string>
+    <string name="file_upload_failed">Failed to upload file</string>
+    <string name="file_dowload_success">File downloaded successfully</string>
+    <string name="file_download_failed">Failed to download file</string>
 </resources>
