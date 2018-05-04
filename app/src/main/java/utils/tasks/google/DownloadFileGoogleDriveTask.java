@@ -2,6 +2,7 @@ package utils.tasks.google;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.icu.text.LocaleDisplayNames;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -26,19 +27,24 @@ public class DownloadFileGoogleDriveTask extends AsyncTask<String, Void, File>
     private CloudService.DownloadFileCallback mCallback;
     private Exception mException;
     private ProgressDialog mDialog;
+    private boolean mSaveTmp;
 
 
     public DownloadFileGoogleDriveTask(Drive service, ProgressDialog dialog,
+                                       boolean saveTmp,
                                        CloudService.DownloadFileCallback callback) {
         this.mService = service;
         this.mCallback = callback;
         this.mDialog = dialog;
+        this.mSaveTmp = saveTmp;
     }
 
     @Override
     protected void onPreExecute() {
-        mDialog.setMessage("Downloading file");
-        mDialog.show();
+        if(mDialog != null) {
+            mDialog.setMessage("Downloading file");
+            mDialog.show();
+        }
     }
 
     @Override
@@ -46,17 +52,30 @@ public class DownloadFileGoogleDriveTask extends AsyncTask<String, Void, File>
         String fileId = args[0];
         String fileName = args[1];
 
-        File path = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOWNLOADS);
-        File file = new File(path, fileName);
+        File file;
 
-        if (!path.exists()) {
-            if (!path.mkdirs()) {
-                mException = new RuntimeException("Unable to create directory: " + path);
+        if(mSaveTmp) {
+            try {
+                String cacheDirPath = args[2];
+                file = File.createTempFile(fileName, null, new File(cacheDirPath));
+            } catch (IOException e) {
+                mException = e;
+                return null;
             }
-        } else if (!path.isDirectory()) {
-            mException = new IllegalStateException("Download path is not a directory: " + path);
-            return null;
+        } else {
+            File path = Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DOWNLOADS);
+            file = new File(path, fileName);
+
+            if (!path.exists()) {
+                if (!path.mkdirs()) {
+                    mException = new RuntimeException("Unable to create directory: " + path);
+                    return null;
+                }
+            } else if (!path.isDirectory()) {
+                mException = new IllegalStateException("Download path is not a directory: " + path);
+                return null;
+            }
         }
 
         try (OutputStream outputStream = new FileOutputStream(file)) {
@@ -72,7 +91,7 @@ public class DownloadFileGoogleDriveTask extends AsyncTask<String, Void, File>
 
     @Override
     protected void onPostExecute(File result) {
-        if (mDialog.isShowing()) {
+        if (mDialog != null && mDialog.isShowing()) {
             mDialog.dismiss();
         }
 

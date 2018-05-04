@@ -10,28 +10,32 @@ import com.google.api.services.drive.model.ParentReference;
 import java.io.IOException;
 import java.util.Collections;
 
+import utils.cloud.AccountType;
+import utils.cloud.CloudResource;
 import utils.services.CloudService;
 import utils.tasks.CloudRequestTask;
 
-public class CreateFolderGoogleDriveTask extends AsyncTask<String, Void, Void>
+public class CreateFolderGoogleDriveTask extends AsyncTask<String, Void, CloudResource>
         implements CloudRequestTask {
     private Drive mService;
-    private CloudService.GenericCallback mCallback;
+    private CloudService.CreateFolderCallback mCallback;
     private Exception mException;
+    private String mAccountEmail;
 
     private final static String GOOGLE_DRIVE_FOLDER_MIME_TYPE
             = "application/vnd.google-apps.folder";
     private final static String GOOGLE_DRIVE_ROOT_FOLDER = "root";
 
 
-    public CreateFolderGoogleDriveTask(Drive service,
-                                       CloudService.GenericCallback callback) {
+    public CreateFolderGoogleDriveTask(Drive service, String accountEmail,
+                                       CloudService.CreateFolderCallback callback) {
         this.mService = service;
         this.mCallback = callback;
+        this.mAccountEmail = accountEmail;
     }
 
     @Override
-    protected Void doInBackground(String... args) {
+    protected CloudResource doInBackground(String... args) {
         String folderId = args[0].equals("") ? GOOGLE_DRIVE_ROOT_FOLDER : args[0];
         String newFolderName = args[1];
 
@@ -42,9 +46,18 @@ public class CreateFolderGoogleDriveTask extends AsyncTask<String, Void, Void>
             new ParentReference().setId(folderId)));
 
         try {
-            mService.files().insert(fileMetadata)
+            File file = mService.files().insert(fileMetadata)
                     .setFields("id, parents")
                     .execute();
+
+            return new CloudResource(
+                    AccountType.GOOGLE_DRIVE,
+                    CloudResource.Type.FILE,
+                    file.getTitle(),
+                    file.getMimeType(),
+                    file.getId(),
+                    mAccountEmail
+            );
         } catch (IOException e) {
             mException = e;
         }
@@ -53,11 +66,11 @@ public class CreateFolderGoogleDriveTask extends AsyncTask<String, Void, Void>
     }
 
     @Override
-    protected void onPostExecute(Void voids) {
+    protected void onPostExecute(CloudResource createdFolder) {
         if (mException != null) {
             mCallback.onError(mException);
         } else {
-            mCallback.onComplete();
+            mCallback.onComplete(createdFolder);
         }
     }
 

@@ -19,15 +19,14 @@ import android.view.MenuItem;
 
 import java.util.List;
 
+import utils.cloud.AccountType;
+import utils.cloud.CloudResource;
 import utils.db.AppDatabase;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
     private Menu mNavigationMenu;
-    private final static int GOOGLE_ACCOUNT = 100;
-    private final static int DROPBOX_ACCOUNT = 200;
     public static final int MY_PERMISSIONS_REQUEST_GET_ACCOUNTS = 1;
 
 
@@ -77,7 +76,6 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
@@ -88,7 +86,7 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-       checkSelectedMenuItem(item.getTitle());
+         checkSelectedMenuItem(item.getTitle(), item.getGroupId());
 
         int id = item.getItemId();
         int groupId = item.getGroupId();
@@ -105,13 +103,13 @@ public class MainActivity extends AppCompatActivity
                         MY_PERMISSIONS_REQUEST_GET_ACCOUNTS);
             } else {
                 fragment = new FilesFragment();
-                bundle.putInt("accountType", GOOGLE_ACCOUNT);
+                bundle.putInt("accountType", AccountType.GOOGLE_DRIVE.ordinal());
                 bundle.putString("accountEmail", item.toString());
                 bundle.putString("folderId", "");
                 fragment.setArguments(bundle);
             }
         } else if (groupId == R.id.dropbox_accounts) {
-            bundle.putInt("accountType", DROPBOX_ACCOUNT);
+            bundle.putInt("accountType", AccountType.DROPBOX.ordinal());
             bundle.putString("accountEmail", item.toString());
             bundle.putString("folderId", "");
             fragment = new FilesFragment();
@@ -139,15 +137,18 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    public void checkSelectedMenuItem(CharSequence tabName) {
+    public void checkSelectedMenuItem(CharSequence tabName, int groupId) {
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         Menu nav_menu = navigationView.getMenu();
 
         for (int i = 0; i < nav_menu.size(); i++) {
-            if(nav_menu.getItem(i).getTitle().equals(tabName)) {
-                nav_menu.getItem(i).setChecked(true);
+            MenuItem menuItem = nav_menu.getItem(i);
+
+            if(menuItem.getTitle().equals(tabName)
+                    && menuItem.getGroupId() == groupId) {
+                menuItem.setChecked(true);
             } else {
-                nav_menu.getItem(i).setChecked(false);
+                menuItem.setChecked(false);
             }
         }
     }

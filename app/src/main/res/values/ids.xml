@@ -4,4 +4,9 @@
     <item name="delete_file" type="id"/>
     <item name="download_file" type="id"/>
     <item name="settings" type="id"/>
+    <item name="copy_file" type="id"/>
+    <item name="cut_file" type="id"/>
+    <item name="paste_file" type="id"/>
+    <item name="refresh_files" type="id"/>
+    <item name="create_folder" type="id"/>
 </resources>

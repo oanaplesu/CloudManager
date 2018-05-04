@@ -3,6 +3,7 @@ package utils.tasks.dropbox;
 
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
@@ -36,21 +37,23 @@ public class UploadFileDropboxTask extends AsyncTask<String, Void, Void>
 
     @Override
     protected void onPreExecute() {
-        mDialog.setMessage("Uploading");
-        mDialog.show();
+        if(mDialog != null) {
+            mDialog.setMessage("Uploading");
+            mDialog.show();
+        }
     }
 
     @Override
     protected Void doInBackground(String... args) {
         String folderId = args[0];
+        String fileName = args[1];
 
         if (mFile == null) {
             return null;
         }
 
-        String remoteFileName = mFile.getName();
         try (InputStream inputStream = new FileInputStream(mFile)) {
-                mDbxClient.files().uploadBuilder(folderId + "/" + remoteFileName)
+                mDbxClient.files().uploadBuilder(folderId + "/" + fileName)
                         .withMode(WriteMode.OVERWRITE)
                         .uploadAndFinish(inputStream);
         } catch (DbxException | IOException e) {
@@ -62,7 +65,7 @@ public class UploadFileDropboxTask extends AsyncTask<String, Void, Void>
 
     @Override
     protected void onPostExecute(Void voids) {
-        if (mDialog.isShowing()) {
+        if (mDialog != null && mDialog.isShowing()) {
             mDialog.dismiss();
         }
 

@@ -6,29 +6,29 @@ import android.webkit.MimeTypeMap;
 import com.facebook.stetho.inspector.console.CLog;
 import com.google.api.services.drive.model.File;
 
+import utils.adapters.AccountAdapter;
+
 public class CloudResource {
     public enum Type {
         FILE, FOLDER
     }
 
-    public enum Provider {
-        GOOGLE_DRIVE, DROPBOX
-    }
-
     private String name;
     private Type type;
-    private File.Thumbnail thumbnail;
     private String mimeType;
-    private Provider provider;
     private String id;
+    private AccountType accountType;
+    private String accountEmail;
 
-    public CloudResource(Provider provider, Type type,
-                         String name, String mimeType, String id) {
+    public CloudResource(AccountType accountType, Type type,
+                         String name, String mimeType,
+                         String id, String accountEmail) {
         this.name = name;
         this.type = type;
         this.mimeType = mimeType;
-        this.provider = provider;
+        this.accountType = accountType;
         this.id = id;
+        this.accountEmail = accountEmail;
     }
 
     public String getName() {
@@ -41,9 +41,11 @@ public class CloudResource {
 
     public String getMimeType() { return this.mimeType; }
 
-    public Provider getProvider() { return this.provider; }
+    public AccountType getAccountType() { return this.accountType; }
 
     public String getId() { return this.id; }
+
+    public String getAccountEmail() { return this.accountEmail; }
 
     public static String getMimeTypeFromFileName(String name) {
         MimeTypeMap mime = MimeTypeMap.getSingleton();

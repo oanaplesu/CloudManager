@@ -122,12 +122,19 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.MetadataView
 
         @Override
         public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
-            if(getAdapterPosition() != 0) {
-                contextMenu.add(Menu.NONE, R.id.delete_file,
-                    0, R.string.delete_file);
-                contextMenu.add(Menu.NONE, R.id.download_file,
-                        0, R.string.download_file);
+            if(getAdapterPosition() == 0) {
+                return;
             }
+
+            contextMenu.add(Menu.NONE, R.id.download_file,
+                    1, R.string.download_file);
+            contextMenu.add(Menu.NONE, R.id.cut_file,
+                    2, R.string.cut_file);
+            contextMenu.add(Menu.NONE, R.id.copy_file,
+                    3, R.string.copy_file);
+            contextMenu.add(Menu.NONE, R.id.delete_file,
+                4, R.string.delete_file);
+
         }
     }
 }

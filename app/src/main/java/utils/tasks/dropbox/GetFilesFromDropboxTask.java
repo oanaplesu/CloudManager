@@ -12,6 +12,7 @@ import com.dropbox.core.v2.files.Metadata;
 
 import java.util.ArrayList;
 
+import utils.cloud.AccountType;
 import utils.cloud.CloudResource;
 import utils.services.CloudService;
 import utils.tasks.CloudRequestTask;
@@ -23,19 +24,24 @@ public class GetFilesFromDropboxTask extends AsyncTask<String, Void, ArrayList<C
     private DbxClientV2 mDbxClient;
     private final CloudService.GetFilesCallback mCallback;
     private Exception mException;
+    private String mAccountEmail;
 
 
-    public GetFilesFromDropboxTask(DbxClientV2 dbxClient, ProgressDialog dialog,
+    public GetFilesFromDropboxTask(DbxClientV2 dbxClient, String accountEmail,
+                                   ProgressDialog dialog,
                                    CloudService.GetFilesCallback callback) {
         this.mCallback = callback;
         this.mDbxClient = dbxClient;
         this.mDialog = dialog;
+        this.mAccountEmail = accountEmail;
     }
 
     @Override
     protected void onPreExecute() {
-        mDialog.setMessage("Loading files");
-        mDialog.show();
+        if(mDialog != null) {
+            mDialog.setMessage("Loading files");
+            mDialog.show();
+        }
     }
 
     @Override
@@ -51,20 +57,22 @@ public class GetFilesFromDropboxTask extends AsyncTask<String, Void, ArrayList<C
 
                 if (file instanceof FolderMetadata) {
                     files.add(0, new CloudResource(
-                                    CloudResource.Provider.DROPBOX,
+                                    AccountType.DROPBOX,
                                     CloudResource.Type.FOLDER,
                                     file.getName(),
                                     mimeType,
-                                    folderId + "/" + file.getName()
+                                    folderId + "/" + file.getName(),
+                                    mAccountEmail
                             )
                     );
                 } else {
                     files.add(new CloudResource(
-                            CloudResource.Provider.DROPBOX,
+                            AccountType.DROPBOX,
                             CloudResource.Type.FILE,
                             file.getName(),
                             mimeType,
-                            folderId + "/" + file.getName()
+                            folderId + "/" + file.getName(),
+                            mAccountEmail
                             )
                     );
                 }
@@ -75,11 +83,12 @@ public class GetFilesFromDropboxTask extends AsyncTask<String, Void, ArrayList<C
                     ? "" : folderId.substring(0, index);
 
             files.add(0, new CloudResource(
-                            CloudResource.Provider.GOOGLE_DRIVE,
+                            AccountType.GOOGLE_DRIVE,
                             CloudResource.Type.FOLDER,
                             "...",
                             "",
-                            parentFolderId
+                            parentFolderId,
+                            mAccountEmail
                     )
             );
 
@@ -97,7 +106,7 @@ public class GetFilesFromDropboxTask extends AsyncTask<String, Void, ArrayList<C
     protected void onPostExecute(ArrayList<CloudResource> files) {
         super.onPostExecute(files);
 
-        if (mDialog.isShowing()) {
+        if (mDialog != null && mDialog.isShowing()) {
             mDialog.dismiss();
         }
 

@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import utils.cloud.AccountType;
 import utils.cloud.CloudResource;
 import utils.services.CloudService;
 import utils.tasks.CloudRequestTask;
@@ -24,6 +25,7 @@ public class GetFilesFromGoogleDriveTask extends AsyncTask<String, Void, List<Cl
     private Drive mService;
     private final CloudService.GetFilesCallback mCallback;
     private Exception mException;
+    private String mAccountEmail;
 
     private final static String GOOGLE_DRIVE_FOLDER_MIME_TYPE
             = "application/vnd.google-apps.folder";
@@ -31,17 +33,21 @@ public class GetFilesFromGoogleDriveTask extends AsyncTask<String, Void, List<Cl
 
 
     public GetFilesFromGoogleDriveTask(Drive service,
+                                       String accountEmail,
                                        ProgressDialog dialog,
                                        CloudService.GetFilesCallback callback) {
         this.mService = service;
         this.mCallback = callback;
         this.mDialog = dialog;
+        this.mAccountEmail = accountEmail;
     }
 
     @Override
     protected void onPreExecute() {
-        mDialog.setMessage("Loading files");
-        mDialog.show();
+        if(mDialog != null) {
+            mDialog.setMessage("Loading files");
+            mDialog.show();
+        }
     }
 
     @Override
@@ -57,20 +63,22 @@ public class GetFilesFromGoogleDriveTask extends AsyncTask<String, Void, List<Cl
 
                 if (file.getMimeType().equals(GOOGLE_DRIVE_FOLDER_MIME_TYPE)) {
                     files.add(0, new CloudResource(
-                            CloudResource.Provider.GOOGLE_DRIVE,
+                            AccountType.GOOGLE_DRIVE,
                             CloudResource.Type.FOLDER,
                             file.getTitle(),
                             file.getMimeType(),
-                            file.getId()
+                            file.getId(),
+                            mAccountEmail
                             )
                     );
                 } else {
                     files.add(new CloudResource(
-                            CloudResource.Provider.GOOGLE_DRIVE,
+                            AccountType.GOOGLE_DRIVE,
                             CloudResource.Type.FILE,
                             file.getTitle(),
                             file.getMimeType(),
-                            file.getId()
+                            file.getId(),
+                            mAccountEmail
                             )
                     );
                 }
@@ -81,11 +89,12 @@ public class GetFilesFromGoogleDriveTask extends AsyncTask<String, Void, List<Cl
                     ? "" :folder.getParents().get(0).getId();
 
             files.add(0, new CloudResource(
-                            CloudResource.Provider.GOOGLE_DRIVE,
+                            AccountType.GOOGLE_DRIVE,
                             CloudResource.Type.FOLDER,
                             "...",
                             "",
-                            parentFolderId
+                            parentFolderId,
+                            mAccountEmail
                     )
             );
 
@@ -101,7 +110,7 @@ public class GetFilesFromGoogleDriveTask extends AsyncTask<String, Void, List<Cl
     protected void onPostExecute(List<CloudResource> files) {
         super.onPostExecute(files);
 
-        if (mDialog.isShowing()) {
+        if (mDialog != null && mDialog.isShowing()) {
             mDialog.dismiss();
         }
 

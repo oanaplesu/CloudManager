@@ -1,6 +1,7 @@
 package utils.services;
 
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 
@@ -10,8 +11,10 @@ import com.dropbox.core.v2.DbxClientV2;
 
 import java.io.File;
 
+import utils.cloud.CloudResource;
 import utils.db.AppDatabase;
 import utils.tasks.CloudRequestTask;
+import utils.tasks.MoveFilesTask;
 import utils.tasks.dropbox.CreateFolderDropboxTask;
 import utils.tasks.dropbox.DeleteFileDropboxTask;
 import utils.tasks.dropbox.DownloadFileDropboxTask;
@@ -20,9 +23,11 @@ import utils.tasks.dropbox.UploadFileDropboxTask;
 
 
 public class DropboxService implements CloudService {
-    DbxClientV2 mService;
+    private DbxClientV2 mService;
+    private String mAccountEmail;
 
     public DropboxService(Context context, String accountEmail) {
+        mAccountEmail = accountEmail;
         AppDatabase database = AppDatabase.getDatabase(context);
 
         String token = database.dropboxUserDao().getTokenForAccount(accountEmail);
@@ -35,12 +40,12 @@ public class DropboxService implements CloudService {
 
     @Override
     public CloudRequestTask getFilesTask(ProgressDialog dialog, GetFilesCallback callback) {
-        return new GetFilesFromDropboxTask(mService, dialog, callback);
+        return new GetFilesFromDropboxTask(mService, mAccountEmail, dialog, callback);
     }
 
     @Override
-    public CloudRequestTask createFolderTask(GenericCallback callback) {
-        return new CreateFolderDropboxTask(mService, callback);
+    public CloudRequestTask createFolderTask(CreateFolderCallback callback) {
+        return new CreateFolderDropboxTask(mService, mAccountEmail, callback);
     }
 
     @Override
@@ -54,7 +59,13 @@ public class DropboxService implements CloudService {
     }
 
     @Override
-    public CloudRequestTask downloadFileTask(ProgressDialog dialog, DownloadFileCallback callback) {
-        return new DownloadFileDropboxTask(mService, dialog, callback);
+    public CloudRequestTask downloadFileTask(ProgressDialog dialog, boolean saveTmp, DownloadFileCallback callback) {
+        return new DownloadFileDropboxTask(mService, dialog, saveTmp, callback);
+    }
+
+    @Override
+    public CloudRequestTask moveFilesTask(CloudResource sourceFile, Context context,
+                                          boolean moveOriginal, MoveFilesCallback callback) {
+        return new MoveFilesTask(this, sourceFile, moveOriginal, context, callback);
     }
 }

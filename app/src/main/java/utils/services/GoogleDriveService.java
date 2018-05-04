@@ -13,6 +13,8 @@ import com.google.api.services.drive.DriveScopes;
 import java.io.File;
 import java.util.Collections;
 
+import utils.cloud.CloudResource;
+import utils.tasks.MoveFilesTask;
 import utils.tasks.google.DeleteFileGoogleDriveTask;
 import utils.tasks.google.DownloadFileGoogleDriveTask;
 import utils.tasks.google.GetFilesFromGoogleDriveTask;
@@ -22,8 +24,10 @@ import utils.tasks.google.UploadFileGoogleDriveTask;
 
 public class GoogleDriveService implements CloudService {
     private Drive mService;
+    private String mAccountEmail;
 
     public GoogleDriveService(Context context, String accountEmail) {
+        this.mAccountEmail = accountEmail;
         GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(
                 context, Collections.singleton(DriveScopes.DRIVE));
         credential.setSelectedAccountName(accountEmail);
@@ -34,12 +38,12 @@ public class GoogleDriveService implements CloudService {
 
     @Override
     public CloudRequestTask getFilesTask(ProgressDialog dialog, GetFilesCallback callback) {
-        return new GetFilesFromGoogleDriveTask(mService, dialog, callback);
+        return new GetFilesFromGoogleDriveTask(mService, mAccountEmail, dialog, callback);
     }
 
     @Override
-    public CloudRequestTask createFolderTask(GenericCallback callback) {
-        return new CreateFolderGoogleDriveTask(mService, callback);
+    public CloudRequestTask createFolderTask(CreateFolderCallback callback) {
+        return new CreateFolderGoogleDriveTask(mService, mAccountEmail, callback);
     }
 
     @Override
@@ -53,7 +57,12 @@ public class GoogleDriveService implements CloudService {
     }
 
     @Override
-    public CloudRequestTask downloadFileTask(ProgressDialog dialog, DownloadFileCallback callback) {
-        return new DownloadFileGoogleDriveTask(mService, dialog, callback);
+    public CloudRequestTask downloadFileTask(ProgressDialog dialog, boolean saveTmp, DownloadFileCallback callback) {
+        return new DownloadFileGoogleDriveTask(mService, dialog, saveTmp, callback);
+    }
+
+    @Override
+    public CloudRequestTask moveFilesTask(CloudResource sourceFile, Context context, boolean deleteOriginal, MoveFilesCallback callback) {
+        return new MoveFilesTask(this, sourceFile, deleteOriginal, context, callback);
     }
 }

@@ -6,8 +6,13 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_main">MainActivity</string>
 
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="app_key">2yh083j61l5n2ce</string>
+
     <string name="delete_file">Delete</string>
     <string name="download_file">Download</string>
+    <string name="cut_file">Cut</string>
+    <string name="copy_file">Copy</string>
+    <string name="paste_file">Paste</string>
+    <string name="refresh">Refresh</string>
+    <string name="create_folder">Create folder</string>
 </resources>

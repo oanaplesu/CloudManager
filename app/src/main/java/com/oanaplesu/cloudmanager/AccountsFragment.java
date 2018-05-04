@@ -43,6 +43,7 @@ public class AccountsFragment extends Fragment {
             public void onAccountClicked(CloudAccount account) {
                 Fragment fragment = null;
                 Bundle bundle = new Bundle();
+                int groupId = R.id.other_options;
 
                 if (account.getProvider() == CloudAccount.Provider.GOOGLE_DRIVE) {
                     if (ContextCompat.checkSelfPermission(getActivity(),
@@ -56,6 +57,7 @@ public class AccountsFragment extends Fragment {
                         bundle.putString("folderId", "");
                         fragment = new FilesFragment();
                         fragment.setArguments(bundle);
+                        groupId = R.id.google_drive_accounts;
                     }
                 } else if (account.getProvider() == CloudAccount.Provider.DROPBOX) {
                     bundle.putInt("accountType", DROPBOX_ACCOUNT);
@@ -63,10 +65,11 @@ public class AccountsFragment extends Fragment {
                     bundle.putString("folderId", "");
                     fragment = new FilesFragment();
                     fragment.setArguments(bundle);
+                    groupId = R.id.dropbox_accounts;
                 }
 
                 if (fragment != null) {
-                    ((MainActivity)getActivity()).checkSelectedMenuItem(account.getEmail());
+                    ((MainActivity)getActivity()).checkSelectedMenuItem(account.getEmail(), groupId);
                     FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
                     ft.replace(R.id.contentFrame, fragment);
                     ft.commit();

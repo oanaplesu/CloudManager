@@ -19,6 +19,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,6 +30,8 @@ import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.apache.commons.io.FileUtils;
+
 import utils.cloud.CloudResource;
 import utils.services.CloudManager;
 import utils.services.CloudService;
@@ -36,11 +39,16 @@ import utils.exceptions.DropboxUniqueFolderNameException;
 import utils.misc.FileAction;
 import utils.adapters.FilesAdapter;
 import utils.misc.UriHelpers;
+import utils.tasks.MoveFilesTask;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import static android.app.Activity.RESULT_OK;
+import static android.support.v4.app.ActivityCompat.invalidateOptionsMenu;
+import static android.view.MenuItem.SHOW_AS_ACTION_ALWAYS;
 
 
 public class FilesFragment extends Fragment {
@@ -52,6 +60,17 @@ public class FilesFragment extends Fragment {
     private CloudResource mSelectedFile;
     private static final int PICKFILE_REQUEST_CODE = 1;
 
+    private class SavedFile {
+        public CloudResource file;
+        public boolean deleteOriginal;
+
+        public SavedFile(CloudResource file, boolean deleteOriginal) {
+            this.file = file;
+            this.deleteOriginal = deleteOriginal;
+        }
+    }
+
+    private static SavedFile mSavedFile = null;
 
     private CloudService getService() {
         return CloudManager.getService(getContext(), mAccountType, mAccountEmail);
@@ -157,6 +176,14 @@ public class FilesFragment extends Fragment {
             performWithPermissions(FileAction.DOWNLOAD);
 
             return true;
+        } else if(id == R.id.copy_file) {
+            mSavedFile = new SavedFile(file, false);
+            getActivity().invalidateOptionsMenu();
+            return true;
+        } else if(id == R.id.cut_file) {
+            mSavedFile = new SavedFile(file, true);
+            getActivity().invalidateOptionsMenu();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -164,7 +191,17 @@ public class FilesFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.files_menu, menu);
+        menu.add(Menu.NONE, R.id.refresh_files, 1, R.string.refresh)
+                .setIcon(R.drawable.refresh_icon)
+                .setShowAsAction(SHOW_AS_ACTION_ALWAYS);
+        menu.add(Menu.NONE, R.id.create_folder, 2, R.string.create_folder);
+
+        if(mSavedFile != null) {
+            menu.add(Menu.NONE, R.id.paste_file, 2, R.string.paste_file);
+        }
+
+        Log.i("aici", "created menu");
+
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -174,13 +211,58 @@ public class FilesFragment extends Fragment {
 
         if (id == R.id.create_folder) {
             createNewFolder();
-
             return true;
-        } else if(id == R.id.refresh_button) {
+        } else if(id == R.id.refresh_files) {
             loadFiles("");
+            return true;
+        } else if(id == R.id.paste_file) {
+            moveSavedFile();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void moveSavedFile() {
+        if(mSavedFile == null) {
+            Toast.makeText(getActivity(), "An error occurred. Try again",
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        getService().moveFilesTask(mSavedFile.file, getContext(),
+                mSavedFile.deleteOriginal, new CloudService.MoveFilesCallback() {
+            @Override
+            public void onComplete(MoveFilesTask.Statistics stats) {
+                if(stats.failed > 0 && stats.filesMoved == 0 && stats.foldersMoved == 0) {
+                    Toast.makeText(getActivity(), "Failed to "
+                            + (mSavedFile.deleteOriginal ? " move " : " copy ")
+                            + "files. Try again",
+                            Toast.LENGTH_LONG).show();
+                } else {
+                    String actionText = (mSavedFile.deleteOriginal ? "Transferred" : "Copied ");
+                    String folderText = stats.foldersMoved == 0 ? ""
+                            : stats.foldersMoved + (stats.foldersMoved == 1 ? "folder" : "folders");
+                    String fileText = stats.filesMoved == 0 ? ""
+                            : stats.filesMoved + (stats.filesMoved == 1 ? " file" : " files");
+                    String failedText = stats.failed == 0 ? "" : "Failed: " + stats.failed;
+                    if(!folderText.isEmpty() && !fileText.isEmpty()) {
+                        fileText = ", " + fileText;
+                    }
+
+                    loadFiles(String.format(Locale.US,"%s: %s %s. %s",
+                            actionText, folderText, fileText, failedText));
+                }
+
+                try {
+                    FileUtils.deleteDirectory(getContext().getCacheDir());
+                } catch (IOException ignored) {
+                }
+
+                mSavedFile = null;
+                getActivity().invalidateOptionsMenu();
+            }
+        }).executeTask(mFolderId);
     }
 
     public void createNewFolder() {
@@ -194,9 +276,9 @@ public class FilesFragment extends Fragment {
             public void onClick(DialogInterface dialog, int whichButton) {
                 String value = input.getText().toString();
 
-                getService().createFolderTask(new CloudService.GenericCallback() {
+                getService().createFolderTask(new CloudService.CreateFolderCallback() {
                     @Override
-                    public void onComplete() {
+                    public void onComplete(CloudResource createdFolder) {
                         loadFiles("Folder created successfully");
                     }
 
@@ -282,7 +364,6 @@ public class FilesFragment extends Fragment {
                     downloadFile(mSelectedFile);
                 }
                 break;
-
         }
     }
 
@@ -315,7 +396,7 @@ public class FilesFragment extends Fragment {
                         Toast.makeText(getActivity(), "Failed to upload file",
                                 Toast.LENGTH_LONG).show();
                     }
-                }).executeTask(mFolderId);
+                }).executeTask(mFolderId, localFile.getName());
             }
         }
     }
@@ -347,7 +428,7 @@ public class FilesFragment extends Fragment {
     private void downloadFile(CloudResource file) {
         ProgressDialog dialog = new ProgressDialog(getContext());
 
-        getService().downloadFileTask(dialog, new CloudService.DownloadFileCallback() {
+        getService().downloadFileTask(dialog, false, new CloudService.DownloadFileCallback() {
             @Override
             public void onComplete(final File file) {
                 Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);

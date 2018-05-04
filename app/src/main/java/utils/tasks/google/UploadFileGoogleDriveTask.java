@@ -3,6 +3,7 @@ package utils.tasks.google;
 
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
@@ -25,6 +26,7 @@ public class UploadFileGoogleDriveTask extends AsyncTask<String, Void, Void>
     private Exception mException;
     private java.io.File mFile;
 
+
     private final static String GOOGLE_DRIVE_ROOT_FOLDER = "root";
 
 
@@ -39,23 +41,25 @@ public class UploadFileGoogleDriveTask extends AsyncTask<String, Void, Void>
 
     @Override
     protected void onPreExecute() {
-        mDialog.setMessage("Uploading");
-        mDialog.show();
+        if(mDialog != null) {
+            mDialog.setMessage("Uploading");
+            mDialog.show();
+        }
     }
 
     @Override
     protected Void doInBackground(String... args) {
-        String folderId = args[0].equals("") ? GOOGLE_DRIVE_ROOT_FOLDER : args[0];
-
         if (mFile == null) {
             return null;
         }
 
-        String remoteFileName = mFile.getName();
+        String folderId = args[0].equals("") ? GOOGLE_DRIVE_ROOT_FOLDER : args[0];
+        String fileName = args[1];
 
         File body = new File();
-        body.setTitle(remoteFileName);
-        String mimeType = CloudResource.getMimeTypeFromFileName(remoteFileName);
+        body.setTitle(fileName);
+
+        String mimeType = CloudResource.getMimeTypeFromFileName(fileName);
         body.setMimeType(mimeType);
         body.setParents(Collections.singletonList(new ParentReference().setId(folderId)));
 
@@ -64,8 +68,7 @@ public class UploadFileGoogleDriveTask extends AsyncTask<String, Void, Void>
         try {
             mService.files().insert(body, mediaContent).execute();
         } catch (IOException e) {
-            System.out.println("An error occurred: " + e);
-            return null;
+            mException = e;
         }
 
         return null;
@@ -73,7 +76,7 @@ public class UploadFileGoogleDriveTask extends AsyncTask<String, Void, Void>
 
     @Override
     protected void onPostExecute(Void voids) {
-        if (mDialog.isShowing()) {
+        if (mDialog != null && mDialog.isShowing()) {
             mDialog.dismiss();
         }
 

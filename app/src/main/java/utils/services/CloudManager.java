@@ -3,24 +3,22 @@ package utils.services;
 import android.content.Context;
 import java.util.Objects;
 
+import utils.cloud.AccountType;
+import utils.cloud.CloudResource;
+
+import static utils.cloud.AccountType.*;
+
 public class CloudManager {
     private static CloudService mInstance = null;
     private static int mHash;
 
-    private final static int GOOGLE_ACCOUNT = 100;
-    private final static int DROPBOX_ACCOUNT = 200;
-
-
     private static CloudService createService(Context context,
                                               int accountType,
                                               String accountEmail) {
-        switch(accountType) {
-            case GOOGLE_ACCOUNT:
-                mInstance = new GoogleDriveService(context, accountEmail);
-                break;
-            case DROPBOX_ACCOUNT:
-                mInstance = new DropboxService(context, accountEmail);
-                break;
+        if(AccountType.GOOGLE_DRIVE.ordinal() == accountType) {
+            mInstance = new GoogleDriveService(context, accountEmail);
+        } else if(AccountType.DROPBOX.ordinal() == accountType) {
+            mInstance = new DropboxService(context, accountEmail);
         }
 
         mHash = Objects.hash(accountType, accountEmail);
@@ -30,8 +28,7 @@ public class CloudManager {
 
     public static CloudService getService(Context context, int accountType,
                                    String accountEmail) {
-        if(mInstance != null && accountEmail.hashCode()
-                == Objects.hash(accountType, accountEmail)) {
+        if(mInstance != null && mHash == Objects.hash(accountType, accountEmail)) {
             return mInstance;
         }
 
