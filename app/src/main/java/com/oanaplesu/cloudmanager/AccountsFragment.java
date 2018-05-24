@@ -78,8 +78,6 @@ public class AccountsFragment extends Fragment {
 
             @Override
             public void onDeleteAccountClicked(CloudAccount account) {
-                Log.i("aici", "delete clicked");
-
                 String provider = null;
 
                 if(account.getProvider() == CloudAccount.Provider.GOOGLE_DRIVE) {

@@ -161,19 +161,6 @@ public class MainActivity extends AppCompatActivity
                 mToolbar.setBackgroundColor(mainColor);
                 mToolbar.setTitle(tabName);
 
-                ColorStateList colorStateList = new ColorStateList(
-                    new int[][]{
-                            new int[]{android.R.attr.state_checked},
-                            new int[]{}
-                    },
-                    new int[] {
-                            mainColor,
-                            Color.BLACK
-                    }
-                );
-                navigationView.setItemTextColor(colorStateList);
-                navigationView.setItemIconTintList(colorStateList);
-
                 menuItem.setChecked(true);
             } else {
                 menuItem.setChecked(false);
