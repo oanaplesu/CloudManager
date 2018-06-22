@@ -11,7 +11,6 @@ import java.util.List;
 
 @Dao
 public interface GoogleDriveUserDao {
-
     @Insert(onConflict = OnConflictStrategy.FAIL)
     void addUser(GoogleDriveUser user);
 
@@ -29,6 +28,4 @@ public interface GoogleDriveUserDao {
 
     @Query("select * from googledriveuser where account like :account")
     public GoogleDriveUser getUserByAccount(String account);
-
-
 }

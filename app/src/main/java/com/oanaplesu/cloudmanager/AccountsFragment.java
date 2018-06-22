@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import utils.adapters.AccountAdapter;
+import utils.cloud.AccountType;
 import utils.db.AppDatabase;
 import utils.cloud.CloudAccount;
 import utils.tasks.DeleteAccountTask;
@@ -27,9 +28,6 @@ import utils.tasks.DeleteAccountTask;
 
 public class AccountsFragment extends Fragment {
     private AccountAdapter mAccountsAdapter;
-
-    private final static int GOOGLE_ACCOUNT = 100;
-    private final static int DROPBOX_ACCOUNT = 200;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -52,7 +50,7 @@ public class AccountsFragment extends Fragment {
                                 new String[]{Manifest.permission.GET_ACCOUNTS},
                                 MainActivity.MY_PERMISSIONS_REQUEST_GET_ACCOUNTS);
                     } else {
-                        bundle.putInt("accountType", GOOGLE_ACCOUNT);
+                        bundle.putInt("accountType",  AccountType.GOOGLE_DRIVE.ordinal());
                         bundle.putString("accountEmail", account.getEmail());
                         bundle.putString("folderId", "");
                         fragment = new FilesFragment();
@@ -60,7 +58,7 @@ public class AccountsFragment extends Fragment {
                         groupId = R.id.google_drive_accounts;
                     }
                 } else if (account.getProvider() == CloudAccount.Provider.DROPBOX) {
-                    bundle.putInt("accountType", DROPBOX_ACCOUNT);
+                    bundle.putInt("accountType", AccountType.DROPBOX.ordinal());
                     bundle.putString("accountEmail", account.getEmail());
                     bundle.putString("folderId", "");
                     fragment = new FilesFragment();
