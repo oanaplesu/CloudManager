@@ -30,7 +30,6 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.Metadata
 
     public interface Callback {
         void onAccountClicked(CloudAccount account);
-        void onDeleteAccountClicked(CloudAccount account);
     }
 
     public AccountAdapter(Callback callback) {
@@ -70,14 +69,12 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.Metadata
     {
         private final TextView mAccountEmailView;
         private final ImageView mAccountProviderView;
-        private final Button mDeleteAccountButton;
         private CloudAccount mItem;
 
         public MetadataViewHolder(View itemView) {
             super(itemView);
             mAccountProviderView = (ImageView)itemView.findViewById(R.id.account_provider);
             mAccountEmailView = (TextView)itemView.findViewById(R.id.account_name);
-            mDeleteAccountButton = (Button)itemView.findViewById(R.id.remove_account);
             itemView.setOnClickListener(this);
         }
 
@@ -95,13 +92,6 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.Metadata
             } else if (mItem.getProvider() == CloudAccount.Provider.DROPBOX) {
                 mAccountProviderView.setImageResource(R.drawable.dropbox_icon_large);
             }
-
-            mDeleteAccountButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mCallback.onDeleteAccountClicked(item);
-                }
-            });
         }
     }
 }

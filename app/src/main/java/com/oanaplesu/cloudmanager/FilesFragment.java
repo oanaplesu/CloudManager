@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import org.apache.commons.io.FileUtils;
@@ -446,5 +447,11 @@ public class FilesFragment extends Fragment {
                         Toast.LENGTH_LONG).show();
             }
         }).executeTask(file.getId(), file.getName());
+    }
+
+    @Override
+    public boolean getUserVisibleHint() {
+        mFilesAdapter.onContextMenuClosed();
+        return true;
     }
 }

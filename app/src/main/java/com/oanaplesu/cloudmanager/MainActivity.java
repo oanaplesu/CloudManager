@@ -123,6 +123,9 @@ public class MainActivity extends AppCompatActivity
                 case R.id.settings:
                     fragment = new AccountsFragment();
                     break;
+                case R.id.about:
+                    fragment = new AboutFragment();
+                    break;
             }
         }
 
@@ -203,11 +206,20 @@ public class MainActivity extends AppCompatActivity
 
             mNavigationMenu.add(R.id.other_options, R.id.settings,
                     Menu.NONE, "Settings").setIcon(R.drawable.settings_icon);
+            mNavigationMenu.add(R.id.other_options, R.id.about,
+                    Menu.NONE, "About").setIcon(R.drawable.about_icon);
         }
     }
 
     public void UpdateNavigationMenu() {
         new UpdateNavigationMenuTask().execute();
+    }
+
+    @Override
+    public void onContextMenuClosed(Menu menu) {
+        super.onContextMenuClosed(menu);
+        getSupportFragmentManager().findFragmentById(R.id.contentFrame)
+                .getUserVisibleHint();
     }
 }
 

@@ -17,6 +17,7 @@ import utils.cloud.CloudResource;
 import utils.tasks.MoveFilesTask;
 import utils.tasks.google.DeleteFileGoogleDriveTask;
 import utils.tasks.google.DownloadFileGoogleDriveTask;
+import utils.tasks.google.GetAccountDetailsGoogleDriveTask;
 import utils.tasks.google.GetFilesFromGoogleDriveTask;
 import utils.tasks.CloudRequestTask;
 import utils.tasks.google.CreateFolderGoogleDriveTask;
@@ -64,5 +65,10 @@ public class GoogleDriveService implements CloudService {
     @Override
     public CloudRequestTask moveFilesTask(CloudResource sourceFile, Context context, boolean deleteOriginal, MoveFilesCallback callback) {
         return new MoveFilesTask(this, sourceFile, deleteOriginal, context, callback);
+    }
+
+    @Override
+    public CloudRequestTask getAccountDetailsTask(GetAccountDetailsCallback callback) {
+        return new GetAccountDetailsGoogleDriveTask(mService, callback);
     }
 }

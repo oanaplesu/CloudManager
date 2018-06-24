@@ -9,4 +9,5 @@
     <item name="paste_file" type="id"/>
     <item name="refresh_files" type="id"/>
     <item name="create_folder" type="id"/>
+    <item name="about" type="id"/>
 </resources>

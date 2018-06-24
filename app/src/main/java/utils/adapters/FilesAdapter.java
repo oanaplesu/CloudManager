@@ -1,6 +1,9 @@
 package utils.adapters;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.support.v7.view.menu.MenuBuilder;
 import android.support.v7.widget.RecyclerView;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -23,6 +26,7 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.MetadataView
     private List<CloudResource> mFiles;
     private final Callback mCallback;
     private int position;
+    private static View lastSeletectedView;
 
     public int getPosition() {
         return position;
@@ -72,6 +76,7 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.MetadataView
     @Override
     public void onViewRecycled(MetadataViewHolder metadataViewHolder) {
         metadataViewHolder.itemView.setOnLongClickListener(null);
+        lastSeletectedView = null;
         super.onViewRecycled(metadataViewHolder);
     }
 
@@ -83,6 +88,12 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.MetadataView
     @Override
     public int getItemCount() {
         return mFiles == null ? 0 : mFiles.size();
+    }
+
+    public void onContextMenuClosed() {
+        if(lastSeletectedView != null) {
+            lastSeletectedView.setBackgroundColor(Color.rgb(250, 250, 250));
+        }
     }
 
     public class MetadataViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
@@ -126,6 +137,9 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.MetadataView
                 return;
             }
 
+            lastSeletectedView = view;
+            view.setBackgroundColor(Color.argb(70,224, 255, 255));
+
             contextMenu.add(Menu.NONE, R.id.download_file,
                     1, R.string.download_file);
             contextMenu.add(Menu.NONE, R.id.cut_file,
@@ -134,7 +148,6 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.MetadataView
                     3, R.string.copy_file);
             contextMenu.add(Menu.NONE, R.id.delete_file,
                 4, R.string.delete_file);
-
         }
     }
 }

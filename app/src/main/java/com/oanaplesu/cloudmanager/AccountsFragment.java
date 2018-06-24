@@ -39,63 +39,15 @@ public class AccountsFragment extends Fragment {
         mAccountsAdapter = new AccountAdapter(new AccountAdapter.Callback() {
             @Override
             public void onAccountClicked(CloudAccount account) {
-                Fragment fragment = null;
+                Fragment fragment = new AccountDetailsFragment();
                 Bundle bundle = new Bundle();
-                int groupId = R.id.other_options;
+                bundle.putInt("accountType", account.getProvider().ordinal());
+                bundle.putString("accountEmail", account.getEmail());
+                fragment.setArguments(bundle);
 
-                if (account.getProvider() == CloudAccount.Provider.GOOGLE_DRIVE) {
-                    if (ContextCompat.checkSelfPermission(getActivity(),
-                            Manifest.permission.GET_ACCOUNTS) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(getActivity(),
-                                new String[]{Manifest.permission.GET_ACCOUNTS},
-                                MainActivity.MY_PERMISSIONS_REQUEST_GET_ACCOUNTS);
-                    } else {
-                        bundle.putInt("accountType",  AccountType.GOOGLE_DRIVE.ordinal());
-                        bundle.putString("accountEmail", account.getEmail());
-                        bundle.putString("folderId", "");
-                        fragment = new FilesFragment();
-                        fragment.setArguments(bundle);
-                        groupId = R.id.google_drive_accounts;
-                    }
-                } else if (account.getProvider() == CloudAccount.Provider.DROPBOX) {
-                    bundle.putInt("accountType", AccountType.DROPBOX.ordinal());
-                    bundle.putString("accountEmail", account.getEmail());
-                    bundle.putString("folderId", "");
-                    fragment = new FilesFragment();
-                    fragment.setArguments(bundle);
-                    groupId = R.id.dropbox_accounts;
-                }
-
-                if (fragment != null) {
-                    ((MainActivity)getActivity()).checkSelectedMenuItem(account.getEmail(), groupId);
-                    FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-                    ft.replace(R.id.contentFrame, fragment);
-                    ft.commit();
-                }
-            }
-
-            @Override
-            public void onDeleteAccountClicked(CloudAccount account) {
-                String provider = null;
-
-                if(account.getProvider() == CloudAccount.Provider.GOOGLE_DRIVE) {
-                    provider = "google";
-                } else if(account.getProvider() == CloudAccount.Provider.DROPBOX) {
-                    provider = "dropbox";
-                }
-
-                new DeleteAccountTask(AppDatabase.getDatabase(getContext()),
-                    new DeleteAccountTask.Callback() {
-                        @Override
-                        public void OnComplete() {
-                            ((MainActivity)getActivity()).UpdateNavigationMenu();
-                            loadAccounts();
-                            Toast.makeText(getContext(), "Account deleted successfully",
-                                    Toast.LENGTH_LONG).show();
-                            refreshFragment();
-                        }
-                    }
-                ).execute(provider, account.getEmail());
+                FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+                ft.replace(R.id.contentFrame, fragment);
+                ft.commit();
             }
         });
 
@@ -137,6 +89,12 @@ public class AccountsFragment extends Fragment {
             for(String accountName : dropboxAccounts) {
                 accountsList.add(new CloudAccount(accountName,
                         CloudAccount.Provider.DROPBOX));
+            }
+
+            if(accountsList.isEmpty()) {
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                ft.replace(R.id.contentFrame, new AddNewAccountFragment());
+                ft.commit();
             }
 
             mAccountsAdapter.setAccounts(accountsList);
