@@ -10,4 +10,5 @@
     <item name="refresh_files" type="id"/>
     <item name="create_folder" type="id"/>
     <item name="about" type="id"/>
+    <item name="details_file" type="id"/>
 </resources>

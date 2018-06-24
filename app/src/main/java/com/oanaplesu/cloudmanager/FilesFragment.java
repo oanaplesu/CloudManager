@@ -28,6 +28,7 @@ import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.commons.io.FileUtils;
@@ -152,7 +153,7 @@ public class FilesFragment extends Fragment {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         int position = mFilesAdapter.getPosition();
-        CloudResource file = mFilesAdapter.getFile(position);
+        final CloudResource file = mFilesAdapter.getFile(position);
         int id = item.getItemId();
 
         if (id == R.id.delete_file) {
@@ -183,6 +184,60 @@ public class FilesFragment extends Fragment {
             mSavedFile = new SavedFile(file, true);
             getActivity().invalidateOptionsMenu();
             return true;
+        } else if(id == R.id.details_file) {
+            ProgressDialog dialog = new ProgressDialog(getContext());
+
+            getService().getFileDetailsTask(dialog, new CloudService.GetFileDetailsCallback() {
+                @Override
+                public void onComplete(CloudService.FileDetails details) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    LayoutInflater inflater = getActivity().getLayoutInflater();
+                    builder.setTitle("File Details");
+                    builder.setCancelable(true);
+
+                    View layout = inflater.inflate(R.layout.file_details, null);
+                    TextView fileTitleTextView = layout.findViewById(R.id.file_title);
+                    TextView fileTypeTextView = layout.findViewById(R.id.file_mime_type);
+                    TextView fileCreatedTextView = layout.findViewById(R.id.file_created);
+                    TextView fileModifiedTextView = layout.findViewById(R.id.file_modified);
+                    TextView fileSizeTextView = layout.findViewById(R.id.file_size);
+                    TextView Created = layout.findViewById(R.id.Created);
+                    TextView Modified = layout.findViewById(R.id.Modified);
+                    TextView Size = layout.findViewById(R.id.Size);
+
+                    fileTitleTextView.setText(details.title);
+                    fileTypeTextView.setText(details.type);
+                    fileCreatedTextView.setText(details.dateCreated);
+                    fileModifiedTextView.setText(details.dateModified);
+                    fileSizeTextView.setText(FileUtils.byteCountToDisplaySize(details.size));
+
+                    if(details.dateCreated == null) {
+                        fileCreatedTextView.setHeight(0);
+                        Created.setHeight(0);
+                    }
+
+                    if(details.dateModified == null) {
+                        fileModifiedTextView.setHeight(0);
+                        Modified.setHeight(0);
+                    }
+
+                    if(details.size == 0) {
+                        fileSizeTextView.setHeight(0);
+                        Size.setHeight(0);
+                    }
+
+                    builder.setView(layout);
+                    builder.setPositiveButton("Close", null);
+                    builder.create();
+                    builder.show();
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    Toast.makeText(getActivity(), "Failed to load file details",
+                            Toast.LENGTH_LONG).show();
+                }
+            }).executeTask(file.getId());
         }
 
         return super.onOptionsItemSelected(item);

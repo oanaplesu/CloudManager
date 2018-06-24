@@ -19,6 +19,7 @@ import utils.tasks.dropbox.CreateFolderDropboxTask;
 import utils.tasks.dropbox.DeleteFileDropboxTask;
 import utils.tasks.dropbox.DownloadFileDropboxTask;
 import utils.tasks.dropbox.GetAccountDetailsDropboxTask;
+import utils.tasks.dropbox.GetFileDetailsDropboxTask;
 import utils.tasks.dropbox.GetFilesFromDropboxTask;
 import utils.tasks.dropbox.UploadFileDropboxTask;
 import utils.tasks.google.GetAccountDetailsGoogleDriveTask;
@@ -74,5 +75,10 @@ public class DropboxService implements CloudService {
     @Override
     public CloudRequestTask getAccountDetailsTask(GetAccountDetailsCallback callback) {
         return new GetAccountDetailsDropboxTask(mService, callback);
+    }
+
+    @Override
+    public CloudRequestTask getFileDetailsTask(ProgressDialog dialog, GetFileDetailsCallback callback) {
+        return new GetFileDetailsDropboxTask(mService, dialog, callback);
     }
 }

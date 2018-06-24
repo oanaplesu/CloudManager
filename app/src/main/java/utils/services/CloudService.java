@@ -7,6 +7,12 @@ import android.graphics.Bitmap;
 import android.support.design.internal.BottomNavigationItemView;
 
 import java.io.File;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 import utils.cloud.AccountType;
@@ -51,6 +57,19 @@ public interface CloudService {
         void onError(Exception e);
     }
 
+    public class FileDetails {
+        public String title;
+        public String type;
+        public String dateCreated;
+        public String dateModified;
+        public long size;
+    }
+
+    interface GetFileDetailsCallback {
+        void onComplete(FileDetails details);
+        void onError(Exception e);
+    }
+
     CloudRequestTask getFilesTask(ProgressDialog dialog, GetFilesCallback callback);
     CloudRequestTask createFolderTask(CreateFolderCallback callback);
     CloudRequestTask deleteFileTask(GenericCallback callback);
@@ -58,4 +77,5 @@ public interface CloudService {
     CloudRequestTask downloadFileTask(ProgressDialog dialog, boolean saveTmp, DownloadFileCallback callback);
     CloudRequestTask moveFilesTask(CloudResource sourceFile, Context context, boolean deleteOriginal, MoveFilesCallback callback);
     CloudRequestTask getAccountDetailsTask(GetAccountDetailsCallback callback);
+    CloudRequestTask getFileDetailsTask(ProgressDialog dialog, GetFileDetailsCallback callback);
 }

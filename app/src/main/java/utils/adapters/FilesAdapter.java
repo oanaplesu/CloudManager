@@ -148,6 +148,8 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.MetadataView
                     3, R.string.copy_file);
             contextMenu.add(Menu.NONE, R.id.delete_file,
                 4, R.string.delete_file);
+            contextMenu.add(Menu.NONE, R.id.details_file,
+                    4, R.string.details_file);
         }
     }
 }
