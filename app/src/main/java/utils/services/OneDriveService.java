@@ -19,6 +19,7 @@ import java.io.File;
 import utils.cloud.CloudResource;
 import utils.db.AppDatabase;
 import utils.tasks.CloudRequestTask;
+import utils.tasks.MoveFilesTask;
 import utils.tasks.onedrive.CreateFolderOneDriveTask;
 import utils.tasks.onedrive.DeleteFileOneDriveTask;
 import utils.tasks.onedrive.DownloadFileOneDriveTask;
@@ -145,7 +146,7 @@ public class OneDriveService implements CloudService {
 
     @Override
     public CloudRequestTask moveFilesTask(CloudResource sourceFile, Context context, Activity activity, boolean deleteOriginal, MoveFilesCallback callback) {
-        return null;
+         return new MoveFilesTask(this, sourceFile, deleteOriginal, context, activity, callback);
     }
 
     @Override
