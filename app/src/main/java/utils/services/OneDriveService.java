@@ -22,6 +22,7 @@ import utils.tasks.CloudRequestTask;
 import utils.tasks.onedrive.CreateFolderOneDriveTask;
 import utils.tasks.onedrive.DeleteFileOneDriveTask;
 import utils.tasks.onedrive.DownloadFileOneDriveTask;
+import utils.tasks.onedrive.GetFileDetailsOneDriveTask;
 import utils.tasks.onedrive.GetFilesFromOneDriveTask;
 import utils.tasks.onedrive.UploadFileOneDriveTask;
 
@@ -155,7 +156,6 @@ public class OneDriveService implements CloudService {
 
     @Override
     public CloudRequestTask getFileDetailsTask(ProgressDialog dialog, GetFileDetailsCallback callback) {
-		return null;
-        //return new GetFileDetailsDropboxTask(mClient, dialog, callback);
+        return new GetFileDetailsOneDriveTask(this, dialog, callback);
     }
 }
