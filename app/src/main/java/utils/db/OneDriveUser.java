@@ -11,9 +11,11 @@ public class OneDriveUser {
     public int id;
     public String account;
     public String token;
+    public String name;
 
-    public OneDriveUser(String account, String token) {
+    public OneDriveUser(String account, String token, String name) {
         this.account = account;
         this.token = token;
+        this.name = name;
     }
 }

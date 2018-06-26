@@ -1,5 +1,6 @@
 package utils.tasks.google;
 
+import android.app.ProgressDialog;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 
@@ -20,13 +21,16 @@ public class GetAccountDetailsGoogleDriveTask extends AsyncTask<String, Void, Vo
     private CloudService.GetAccountDetailsCallback mCallback;
     private Exception mException;
     private CloudService.AccountDetails mDetails;
+    private ProgressDialog mDialog;
 
 
     public GetAccountDetailsGoogleDriveTask(Drive service,
+                                            ProgressDialog dialog,
                                             CloudService.GetAccountDetailsCallback callback) {
         this.mService = service;
         this.mCallback = callback;
         this.mDetails = new CloudService.AccountDetails();
+        this.mDialog = dialog;
     }
 
     @Override
@@ -45,8 +49,6 @@ public class GetAccountDetailsGoogleDriveTask extends AsyncTask<String, Void, Vo
                 InputStream in = new java.net.URL(photoUrl).openStream();
                 mDetails.photo = BitmapFactory.decodeStream(in);
             }
-        } catch (IOException e) {
-            mException = e;
         } catch (Exception e) {
             mException = e;
         }
@@ -55,7 +57,21 @@ public class GetAccountDetailsGoogleDriveTask extends AsyncTask<String, Void, Vo
     }
 
     @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+
+        if(mDialog != null) {
+            mDialog.setMessage("Requesting informations");
+            mDialog.show();
+        }
+    }
+
+    @Override
     protected void onPostExecute(Void voids) {
+        if (mDialog != null && mDialog.isShowing()) {
+            mDialog.dismiss();
+        }
+
         if (mException != null) {
             mCallback.onError(mException);
         } else {

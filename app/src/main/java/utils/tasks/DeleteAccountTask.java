@@ -25,8 +25,10 @@ public class DeleteAccountTask extends AsyncTask<String, Void, Void> {
 
         if(provider.equals("google")) {
             mDb.googleDriveUserDao().removeUser(email);
-        } else if(provider.equals("dropbox")){
+        } else if(provider.equals("dropbox")) {
             mDb.dropboxUserDao().removeUser(email);
+        } else if(provider.equals("onedrive")) {
+            mDb.oneDriveUserDao().removeUser(email);
         }
 
         return null;

@@ -249,8 +249,8 @@ public class AddNewAccountFragment extends Fragment {
 
                 new RequestEmailTask(accessToken, new RequestEmailTask.Callback() {
                     @Override
-                    public void onComplete(String email) {
-                        OneDriveUser oneDriveUser = new OneDriveUser(email, refreshToken);
+                    public void onComplete(String email, String name) {
+                        OneDriveUser oneDriveUser = new OneDriveUser(email, refreshToken, name);
                         result.getAuthenticator().logout();
 
                         try {
@@ -286,9 +286,10 @@ public class AddNewAccountFragment extends Fragment {
         private Callback mCallback;
         private Exception mException;
         private String mEmail;
+        private String mName;
 
         public interface Callback {
-            void onComplete(String email);
+            void onComplete(String email, String name);
             void onError(Exception e);
         }
 
@@ -316,6 +317,7 @@ public class AddNewAccountFragment extends Fragment {
 
                 JSONObject o = new JSONObject(res.toString());
                 mEmail = o.getJSONObject("emails").get("account").toString();
+                mName = o.get("name").toString();
             } catch (IOException | JSONException e) {
                 mException = e;
             }
@@ -330,7 +332,7 @@ public class AddNewAccountFragment extends Fragment {
             if(mException != null) {
                 mCallback.onError(mException);
             } else {
-                mCallback.onComplete(mEmail);
+                mCallback.onComplete(mEmail, mName);
             }
         }
     }

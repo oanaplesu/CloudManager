@@ -169,6 +169,8 @@ public class MainActivity extends AppCompatActivity
                     case R.id.dropbox_accounts:
                         mainColor = getResources().getColor(R.color.colorDropbox);
                         break;
+                    case R.id.onedrive_accounts:
+                        mainColor = getResources().getColor(R.color.colorOneDrive);
                     default:
                         break;
                 }

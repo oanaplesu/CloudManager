@@ -7,7 +7,7 @@ import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 
 
-@Database(entities = {GoogleDriveUser.class, DropboxUser.class, OneDriveUser.class}, version = 16, exportSchema = false)
+@Database(entities = {GoogleDriveUser.class, DropboxUser.class, OneDriveUser.class}, version = 17, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static AppDatabase INSTANCE;

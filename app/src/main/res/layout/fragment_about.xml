@@ -32,7 +32,7 @@
             android:layout_marginTop="26dp"
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
-            android:text="Cloud Manager is a management tool for cloud storage accounts. Currently Google Drive and Dropbox are supported, but it will be extended in the future to also accept other cloud providers like OneDrive. Created by Plesu Iuliana-Oana"
+            android:text="Cloud Manager is a management tool for cloud storage accounts. Currently only Google Drive, Dropbox and OneDrive are supported, but it will be extended in the future to also accept other cloud providers. Created by Plesu Iuliana-Oana"
             android:textAlignment="center"
             android:textSize="18sp" />
     </RelativeLayout>

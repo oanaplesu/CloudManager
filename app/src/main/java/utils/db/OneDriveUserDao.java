@@ -15,6 +15,9 @@ public interface OneDriveUserDao {
     @Query("select account from onedriveuser")
     public List<String> getAllAccounts();
 
+    @Query("select name from onedriveuser where account like :account")
+    public String getNameForAccount(String account);
+
     @Query("UPDATE onedriveuser SET token = :token WHERE account like :account")
 	void updateUser(String account, String token);
 

@@ -1,5 +1,6 @@
 package utils.tasks.dropbox;
 
+import android.app.ProgressDialog;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -19,13 +20,16 @@ public class GetAccountDetailsDropboxTask extends AsyncTask<String, Void, Void>
     private CloudService.GetAccountDetailsCallback mCallback;
     private Exception mException;
     private CloudService.AccountDetails mDetails;
+    private ProgressDialog mDialog;
 
 
     public GetAccountDetailsDropboxTask(DbxClientV2 dbxClient,
+                                        ProgressDialog dialog,
                                         CloudService.GetAccountDetailsCallback callback) {
         this.mDbxClient = dbxClient;
         this.mCallback = callback;
         this.mDetails = new CloudService.AccountDetails();
+        this.mDialog = dialog;
     }
 
     @Override
@@ -52,11 +56,25 @@ public class GetAccountDetailsDropboxTask extends AsyncTask<String, Void, Void>
 
     @Override
     protected void onPostExecute(Void voids) {
+        if (mDialog != null && mDialog.isShowing()) {
+            mDialog.dismiss();
+        }
+
         if (mException != null) {
             mCallback.onError(mException);
         } else {
             mCallback.onComplete(mDetails);
         }
+    }
+
+    @Override
+    protected void onPreExecute() {
+        if(mDialog != null) {
+            mDialog.setMessage("Requesting informations");
+            mDialog.show();
+        }
+
+        super.onPreExecute();
     }
 
     @Override

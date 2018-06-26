@@ -29,9 +29,11 @@ import utils.tasks.google.GetAccountDetailsGoogleDriveTask;
 public class DropboxService implements CloudService {
     private DbxClientV2 mService;
     private String mAccountEmail;
+    private Context mContext;
 
     public DropboxService(Context context, String accountEmail) {
         mAccountEmail = accountEmail;
+        mContext = context;
         AppDatabase database = AppDatabase.getDatabase(context);
 
         String token = database.dropboxUserDao().getTokenForAccount(accountEmail);
@@ -74,8 +76,8 @@ public class DropboxService implements CloudService {
     }
 
     @Override
-    public CloudRequestTask getAccountDetailsTask(GetAccountDetailsCallback callback) {
-        return new GetAccountDetailsDropboxTask(mService, callback);
+    public CloudRequestTask getAccountDetailsTask(ProgressDialog dialog, GetAccountDetailsCallback callback) {
+        return new GetAccountDetailsDropboxTask(mService, dialog, callback);
     }
 
     @Override

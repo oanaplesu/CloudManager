@@ -77,6 +77,6 @@ public interface CloudService {
     CloudRequestTask uploadFileTask(File file, ProgressDialog dialog, GenericCallback callback);
     CloudRequestTask downloadFileTask(ProgressDialog dialog, boolean saveTmp, DownloadFileCallback callback);
     CloudRequestTask moveFilesTask(CloudResource sourceFile, Context context, Activity activity, boolean deleteOriginal, MoveFilesCallback callback);
-    CloudRequestTask getAccountDetailsTask(GetAccountDetailsCallback callback);
+    CloudRequestTask getAccountDetailsTask(ProgressDialog dialog, GetAccountDetailsCallback callback);
     CloudRequestTask getFileDetailsTask(ProgressDialog dialog, GetFileDetailsCallback callback);
 }

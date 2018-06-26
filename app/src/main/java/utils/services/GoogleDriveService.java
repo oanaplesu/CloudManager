@@ -13,6 +13,7 @@ import com.google.api.services.drive.DriveScopes;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.zip.CheckedOutputStream;
 
 import utils.cloud.CloudResource;
 import utils.tasks.MoveFilesTask;
@@ -73,8 +74,8 @@ public class GoogleDriveService implements CloudService {
     }
 
     @Override
-    public CloudRequestTask getAccountDetailsTask(GetAccountDetailsCallback callback) {
-        return new GetAccountDetailsGoogleDriveTask(mService, callback);
+    public CloudRequestTask getAccountDetailsTask(ProgressDialog dialog, GetAccountDetailsCallback callback) {
+        return new GetAccountDetailsGoogleDriveTask(mService, dialog, callback);
     }
 
     @Override

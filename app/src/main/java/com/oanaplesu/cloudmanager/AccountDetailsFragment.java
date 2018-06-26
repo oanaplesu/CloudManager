@@ -2,6 +2,7 @@ package com.oanaplesu.cloudmanager;
 
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,6 +18,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.facebook.stetho.inspector.console.CLog;
 
 import org.apache.commons.io.FileUtils;
 
@@ -43,18 +46,28 @@ public class AccountDetailsFragment extends Fragment {
         final ProgressBar progressBar = inflatedView.findViewById(R.id.progressBar);
         final TextView storageTextView = inflatedView.findViewById(R.id.storage);
 
-        accountTypeTextView.setText(mAccountType == AccountType.DROPBOX.ordinal() ?
-                "Dropbox" : "Google Drive");
+        if(mAccountType == AccountType.GOOGLE_DRIVE.ordinal()) {
+            accountTypeTextView.setText("Google Drive");
+        } else if(mAccountType == AccountType.DROPBOX.ordinal()) {
+            accountTypeTextView.setText("Dropbox");
+        } else if(mAccountType == AccountType.ONEDRIVE.ordinal()) {
+            accountTypeTextView.setText("One Drive");
+        }
+
         accountEmailTextView.setText(mAccountEmail);
 
         final Button deleteAccountButton = inflatedView.findViewById(R.id.delete_account_button);
         deleteAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String provider = "dropbox";
+                String provider = "";
 
                 if(mAccountType == CloudAccount.Provider.GOOGLE_DRIVE.ordinal()) {
                     provider = "google";
+                } else if(mAccountType == CloudAccount.Provider.DROPBOX.ordinal()) {
+                    provider = "dropbox";
+                } else if(mAccountType == CloudAccount.Provider.ONEDRIVE.ordinal()) {
+                    provider = "onedrive";
                 }
 
                 new DeleteAccountTask(AppDatabase.getDatabase(getContext()),
@@ -103,6 +116,13 @@ public class AccountDetailsFragment extends Fragment {
                     fragment = new FilesFragment();
                     fragment.setArguments(bundle);
                     groupId = R.id.dropbox_accounts;
+                } else if (mAccountType == CloudAccount.Provider.ONEDRIVE.ordinal()) {
+                    bundle.putInt("accountType",  AccountType.ONEDRIVE.ordinal());
+                    bundle.putString("accountEmail", mAccountEmail);
+                    bundle.putString("folderId", "");
+                    fragment = new FilesFragment();
+                    fragment.setArguments(bundle);
+                    groupId = R.id.onedrive_accounts;
                 }
 
                 ((MainActivity)getActivity()).checkSelectedMenuItem(mAccountEmail, groupId);
@@ -115,8 +135,10 @@ public class AccountDetailsFragment extends Fragment {
             }
         });
 
+        ProgressDialog dialog = new ProgressDialog(getContext());
+
         CloudManager.getService(getContext(), mAccountType, mAccountEmail, getActivity())
-                .getAccountDetailsTask(new CloudService.GetAccountDetailsCallback() {
+                .getAccountDetailsTask(dialog, new CloudService.GetAccountDetailsCallback() {
                     @Override
                     public void onComplete(CloudService.AccountDetails details) {
                         accountNameTextView.setText(details.name);
