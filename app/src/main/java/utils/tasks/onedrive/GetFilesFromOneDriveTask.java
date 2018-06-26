@@ -19,14 +19,11 @@ import utils.services.CloudService;
 import utils.services.OneDriveService;
 import utils.tasks.CloudRequestTask;
 
-public class GetFilesFromOneDriveTask implements CloudRequestTask {
+public class GetFilesFromOneDriveTask extends OneDriveRequestTask {
     private ProgressDialog mDialog;
-    private IDriveRequestBuilder mClient;
-    private OneDriveService mOnedriveService;
     private final CloudService.GetFilesCallback mCallback;
-    private Exception mException;
     private String mAccountEmail;
-    List<CloudResource> mFiles;
+    private List<CloudResource> mFiles;
 
 
     public GetFilesFromOneDriveTask(OneDriveService onedriveService,
@@ -39,6 +36,7 @@ public class GetFilesFromOneDriveTask implements CloudRequestTask {
         this.mAccountEmail = accountEmail;
     }
 
+    @Override
     protected void onPreExecute() {
         if(mDialog != null) {
             mDialog.setMessage("Loading files");
@@ -49,35 +47,7 @@ public class GetFilesFromOneDriveTask implements CloudRequestTask {
     }
 
     @Override
-    public void executeTask(String... args) {
-        onPreExecute();
-
-        if(!mOnedriveService.isInitialized()) {
-            mOnedriveService.createService(new OneDriveService.OnCreateCallback() {
-                @Override
-                public void onComplete() {
-                    mClient =  mOnedriveService.getClient();
-                    if(mClient != null) {
-                        executeTaskInternal(args);
-                    } else {
-                        mException = new Exception("Error");
-                        onPostExecute();
-                    }
-                }
-
-                @Override
-                public void onError(Exception e) {
-                    mException = e;
-                    onPostExecute();
-                }
-            });
-        } else {
-            mClient =  mOnedriveService.getClient();
-            executeTaskInternal(args);
-        }
-    }
-
-    private void executeTaskInternal(String... args) {
+    protected void executeTaskInternal(String... args) {
         String folderId = args[0];
 
 		IItemRequestBuilder folder;
@@ -161,7 +131,8 @@ public class GetFilesFromOneDriveTask implements CloudRequestTask {
 					}
 				});
     }
-	
+
+    @Override
     protected void onPostExecute() {
         if (mDialog != null && mDialog.isShowing()) {
             mDialog.dismiss();

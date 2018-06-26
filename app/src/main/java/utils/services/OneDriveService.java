@@ -19,7 +19,11 @@ import java.io.File;
 import utils.cloud.CloudResource;
 import utils.db.AppDatabase;
 import utils.tasks.CloudRequestTask;
+import utils.tasks.onedrive.CreateFolderOneDriveTask;
+import utils.tasks.onedrive.DeleteFileOneDriveTask;
+import utils.tasks.onedrive.DownloadFileOneDriveTask;
 import utils.tasks.onedrive.GetFilesFromOneDriveTask;
+import utils.tasks.onedrive.UploadFileOneDriveTask;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -44,16 +48,11 @@ public class OneDriveService implements CloudService {
         mInitialized = false;
     }
 
-    public boolean isInitialized() {
+    public boolean isClientInitialized() {
         return mInitialized;
     }
 
-    public interface OnCreateCallback {
-        void onComplete();
-        void onError(Exception e);
-    }
-
-    public void createService(OnCreateCallback callback) {
+    public void createClient(GenericCallback callback) {
         AppDatabase database = AppDatabase.getDatabase(mContext);
         String token = database.oneDriveUserDao().getTokenForAccount(mAccountEmail);
 
@@ -121,30 +120,26 @@ public class OneDriveService implements CloudService {
     @Override
     public CloudRequestTask getFilesTask(ProgressDialog dialog, GetFilesCallback callback) {
         return new GetFilesFromOneDriveTask(this, mAccountEmail, dialog, callback);
-        }
+    }
 
     @Override
     public CloudRequestTask createFolderTask(CreateFolderCallback callback) {
-        return null;
-        //return new CreateFolderOneDriveTask(mClient, mAccountEmail, callback);
+        return new CreateFolderOneDriveTask(this, mAccountEmail, callback);
     }
 
     @Override
     public CloudRequestTask deleteFileTask(GenericCallback callback) {
-	    return null;
-        //return new DeleteFileOneDriveTask(mClient, callback);
+        return new DeleteFileOneDriveTask(this, callback);
     }
 
     @Override
     public CloudRequestTask uploadFileTask(File file, ProgressDialog dialog, GenericCallback callback) {
-		return null;
-       // return new UploadFileOneDriveTask(mClient, file, dialog, callback);
+        return new UploadFileOneDriveTask(this, file, dialog, callback);
     }
 
     @Override
     public CloudRequestTask downloadFileTask(ProgressDialog dialog, boolean saveTmp, DownloadFileCallback callback) {
-        return null;
-       // return new DownloadFileOneDriveTask(mClient, dialog, saveTmp, callback);
+        return new DownloadFileOneDriveTask(this, dialog, saveTmp, callback);
     }
 
     @Override

@@ -91,6 +91,8 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.Metadata
                 mAccountProviderView.setImageResource(R.drawable.google_drive_icon_large);
             } else if (mItem.getProvider() == CloudAccount.Provider.DROPBOX) {
                 mAccountProviderView.setImageResource(R.drawable.dropbox_icon_large);
+            } else if (mItem.getProvider() == CloudAccount.Provider.ONEDRIVE) {
+                mAccountProviderView.setImageResource(R.drawable.onedrive_icon_large);
             }
         }
     }

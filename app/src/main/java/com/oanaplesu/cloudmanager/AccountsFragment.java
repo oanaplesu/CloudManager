@@ -67,12 +67,14 @@ public class AccountsFragment extends Fragment {
         private AppDatabase database;
         List<String> googleAccounts;
         List<String> dropboxAccounts;
+        List<String> onedriveAccounts;
 
         @Override
         protected Void doInBackground(Void... args) {
             database = AppDatabase.getDatabase(getContext());
             googleAccounts = database.googleDriveUserDao().getAllAccounts();
             dropboxAccounts = database.dropboxUserDao().getAllAccounts();
+            onedriveAccounts = database.oneDriveUserDao().getAllAccounts();
 
             return null;
         }
@@ -89,6 +91,11 @@ public class AccountsFragment extends Fragment {
             for(String accountName : dropboxAccounts) {
                 accountsList.add(new CloudAccount(accountName,
                         CloudAccount.Provider.DROPBOX));
+            }
+
+            for(String accountName : onedriveAccounts) {
+                accountsList.add(new CloudAccount(accountName,
+                        CloudAccount.Provider.ONEDRIVE));
             }
 
             if(accountsList.isEmpty()) {
