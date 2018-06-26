@@ -10,24 +10,29 @@
         android:layout_height="match_parent"
         android:background="@drawable/gradient">
 
-        <ImageView
-            android:id="@+id/imageView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/dropbox_drive_sync" />
-
-        <RelativeLayout
+        <LinearLayout
+            android:id="@+id/linearLayout2"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/imageView2">
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.7"
+                android:src="@drawable/all_providers"
+                android:padding="30dp"/>
 
             <LinearLayout
                 android:id="@+id/linearLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
-                android:orientation="vertical">
+                android:layout_below="@id/imageView2"
+                android:layout_weight="0.3"
+                android:orientation="vertical"
+                android:layout_gravity="center"
+                android:padding="30dp">
 
                 <Button
                     android:id="@+id/googleSignInButton"
@@ -47,6 +52,7 @@
                     android:id="@+id/dropboxSignInButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
                     android:background="@drawable/buttonshape"
                     android:drawableLeft="@drawable/dropbox_icon"
                     android:paddingLeft="70dp"
@@ -59,7 +65,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/buttonshape"
-                    android:drawableLeft="@drawable/onedrive_icon"
+                    android:drawableLeft="@drawable/onedrive_icon_blue"
                     android:paddingLeft="70dp"
                     android:paddingRight="70dp"
                     android:text="Sign In"
@@ -67,7 +73,6 @@
                     android:textSize="20sp" />
 
             </LinearLayout>
-        </RelativeLayout>
-
+        </LinearLayout>
     </RelativeLayout>
 </FrameLayout>
