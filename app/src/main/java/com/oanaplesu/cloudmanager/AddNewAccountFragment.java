@@ -2,6 +2,7 @@ package com.oanaplesu.cloudmanager;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -26,10 +27,34 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.Scope;
 import com.google.api.services.drive.DriveScopes;
+import com.onedrive.sdk.authentication.MSAAuthenticator;
+import com.onedrive.sdk.concurrency.ICallback;
+import com.onedrive.sdk.core.ClientException;
+import com.onedrive.sdk.core.DefaultClientConfig;
+import com.onedrive.sdk.core.IClientConfig;
+import com.onedrive.sdk.extensions.IOneDriveClient;
+import com.onedrive.sdk.extensions.OneDriveClient;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.List;
 
 import utils.db.AppDatabase;
 import utils.db.DropboxUser;
 import utils.db.GoogleDriveUser;
+import utils.db.OneDriveUser;
+import utils.services.OneDriveService;
+
+import static android.content.Context.MODE_PRIVATE;
+import static com.onedrive.sdk.core.DefaultClientConfig.*;
 
 
 public class AddNewAccountFragment extends Fragment {
@@ -53,6 +78,13 @@ public class AddNewAccountFragment extends Fragment {
         dropboxSignInButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 signInDropbox();
+            }
+        });
+
+        final Button onedriveSignInButton = inflatedView.findViewById(R.id.onedriveSignInButton);
+        onedriveSignInButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                addNewAccountOneDrive();
             }
         });
 
@@ -194,4 +226,114 @@ public class AddNewAccountFragment extends Fragment {
             return true;
         }
     }
+
+
+    public void addNewAccountOneDrive() {
+        MSAAuthenticator auth = OneDriveService.getMSAAuthenticatorOneDrive();
+        IClientConfig oneDriveConfig = createWithAuthenticator(auth);
+
+        final SharedPreferences onedrivePreferences = getContext().getSharedPreferences(
+                OneDriveService.SHARED_PREFERENCES_ONEDRIVE_FILE, MODE_PRIVATE);
+        final SharedPreferences tokenPreferences = getContext().getSharedPreferences(
+                OneDriveService.SHARED_PREFERENCES_TOKEN_FILE, MODE_PRIVATE);
+
+        onedrivePreferences.edit().clear().commit();
+        tokenPreferences.edit().clear().commit();
+
+        ICallback<IOneDriveClient> callback = new ICallback<IOneDriveClient>() {
+            @Override
+            public void success(final IOneDriveClient result) {
+                AppDatabase database = AppDatabase.getDatabase(getActivity());
+                String refreshToken = tokenPreferences.getString(OneDriveService.REFRESH_TOKEN_KEY, "");
+                String accessToken = result.getAuthenticator().getAccountInfo().getAccessToken();
+
+                new RequestEmailTask(accessToken, new RequestEmailTask.Callback() {
+                    @Override
+                    public void onComplete(String email) {
+                        OneDriveUser oneDriveUser = new OneDriveUser(email, refreshToken);
+                        result.getAuthenticator().logout();
+
+                        try {
+                            database.oneDriveUserDao().addUser(oneDriveUser);
+                            ((MainActivity)getActivity()).UpdateNavigationMenu();
+                            Toast.makeText(getActivity(), "Account added succesfully", Toast.LENGTH_LONG).show();
+                        } catch (android.database.sqlite.SQLiteConstraintException ex) {
+                            Toast.makeText(getActivity(), "Account already added", Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        Toast.makeText(getActivity(), "Adding account failed. Try again", Toast.LENGTH_LONG).show();
+                    }
+                }).execute();
+            }
+
+            @Override
+            public void failure(final ClientException error) {
+                Toast.makeText(getActivity(), "Adding account failed. Try again", Toast.LENGTH_LONG).show();
+            }
+        };
+
+        //to replace
+        new OneDriveClient.Builder()
+                .fromConfig(oneDriveConfig)
+                .loginAndBuildClient(getActivity(), callback);
+    }
+
+    private static class RequestEmailTask extends AsyncTask<Void, Void, Void> {
+        private String mAccessToken;
+        private Callback mCallback;
+        private Exception mException;
+        private String mEmail;
+
+        public interface Callback {
+            void onComplete(String email);
+            void onError(Exception e);
+        }
+
+        public RequestEmailTask(String accessToken, Callback callback) {
+            this.mAccessToken = accessToken;
+            this.mCallback = callback;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            HttpClient client = new DefaultHttpClient();
+            HttpGet get = new HttpGet("https://apis.live.net/v5.0/me");
+            get.setHeader("Authorization", "bearer " + mAccessToken);
+
+            HttpResponse response = null;
+            try {
+                response = client.execute(get);
+
+                BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+                StringBuffer res = new StringBuffer();
+                String line = "";
+                while ((line = rd.readLine()) != null) {
+                    res.append(line);
+                }
+
+                JSONObject o = new JSONObject(res.toString());
+                mEmail = o.getJSONObject("emails").get("account").toString();
+            } catch (IOException | JSONException e) {
+                mException = e;
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            if(mException != null) {
+                mCallback.onError(mException);
+            } else {
+                mCallback.onComplete(mEmail);
+            }
+        }
+    }
 }
+
+

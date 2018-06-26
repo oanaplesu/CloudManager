@@ -3,7 +3,7 @@ package utils.cloud;
 
 public class CloudAccount {
     public enum Provider {
-        GOOGLE_DRIVE, DROPBOX
+        GOOGLE_DRIVE, DROPBOX, ONEDRIVE
     }
 
     private String mEmail;

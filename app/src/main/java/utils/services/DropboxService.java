@@ -1,6 +1,7 @@
 package utils.services;
 
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -67,9 +68,9 @@ public class DropboxService implements CloudService {
     }
 
     @Override
-    public CloudRequestTask moveFilesTask(CloudResource sourceFile, Context context,
+    public CloudRequestTask moveFilesTask(CloudResource sourceFile, Context context, Activity activity,
                                           boolean moveOriginal, MoveFilesCallback callback) {
-        return new MoveFilesTask(this, sourceFile, moveOriginal, context, callback);
+        return new MoveFilesTask(this, sourceFile, moveOriginal, context, activity, callback);
     }
 
     @Override

@@ -1,6 +1,10 @@
 package com.oanaplesu.cloudmanager;
 
 import android.Manifest;
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AuthenticatorDescription;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -16,6 +20,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -48,7 +53,7 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         mNavigationMenu = navigationView.getMenu();
         navigationView.setNavigationItemSelectedListener(this);
-      //  getApplicationContext().deleteDatabase("userdatabase");
+       // getApplicationContext().deleteDatabase("userdatabase");
 
         UpdateNavigationMenu();
 
@@ -115,6 +120,12 @@ public class MainActivity extends AppCompatActivity
             bundle.putString(getString(R.string.folder_id), "");
             fragment = new FilesFragment();
             fragment.setArguments(bundle);
+        } else if (groupId == R.id.onedrive_accounts) {
+            bundle.putInt(getString(R.string.account_type), AccountType.ONEDRIVE.ordinal());
+            bundle.putString(getString(R.string.account_email), item.toString());
+            bundle.putString(getString(R.string.folder_id), "");
+            fragment = new FilesFragment();
+            fragment.setArguments(bundle);
         } else if(groupId == R.id.other_options){
             switch(id) {
                 case R.id.add_new_account:
@@ -175,12 +186,14 @@ public class MainActivity extends AppCompatActivity
         private AppDatabase database;
         List<String> googleAccounts;
         List<String> dropboxAccounts;
+        List<String> oneDriveAccounts;
 
         @Override
         protected Void doInBackground(Void... args) {
             database = AppDatabase.getDatabase(getApplicationContext());
             googleAccounts = database.googleDriveUserDao().getAllAccounts();
             dropboxAccounts = database.dropboxUserDao().getAllAccounts();
+            oneDriveAccounts = database.oneDriveUserDao().getAllAccounts();
 
             return null;
         }
@@ -199,6 +212,11 @@ public class MainActivity extends AppCompatActivity
             for(String account : dropboxAccounts) {
                 mNavigationMenu.add(R.id.dropbox_accounts,
                         Menu.NONE, Menu.NONE, account).setIcon(R.drawable.dropbox_icon_black);
+            }
+
+            for(String account : oneDriveAccounts) {
+                mNavigationMenu.add(R.id.onedrive_accounts,
+                        Menu.NONE, Menu.NONE, account).setIcon(R.drawable.onedrive_icon);
             }
 
             mNavigationMenu.add(R.id.other_options, R.id.add_new_account,

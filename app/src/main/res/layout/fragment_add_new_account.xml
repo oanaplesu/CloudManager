@@ -54,6 +54,17 @@
                     android:text="Sign In"
                     android:textColor="@color/colorPrimary"
                     android:textSize="20sp" />
+                <Button
+                    android:id="@+id/onedriveSignInButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/buttonshape"
+                    android:drawableLeft="@drawable/onedrive_icon"
+                    android:paddingLeft="70dp"
+                    android:paddingRight="70dp"
+                    android:text="Sign In"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="20sp" />
 
             </LinearLayout>
         </RelativeLayout>

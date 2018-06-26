@@ -1,6 +1,7 @@
 package utils.services;
 
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 
@@ -65,8 +66,10 @@ public class GoogleDriveService implements CloudService {
     }
 
     @Override
-    public CloudRequestTask moveFilesTask(CloudResource sourceFile, Context context, boolean deleteOriginal, MoveFilesCallback callback) {
-        return new MoveFilesTask(this, sourceFile, deleteOriginal, context, callback);
+    public CloudRequestTask moveFilesTask(CloudResource sourceFile, Context context,
+                                          Activity activity, boolean deleteOriginal, MoveFilesCallback callback) {
+        return new MoveFilesTask(this, sourceFile, deleteOriginal, context,
+                activity, callback);
     }
 
     @Override

@@ -115,7 +115,7 @@ public class AccountDetailsFragment extends Fragment {
             }
         });
 
-        CloudManager.getService(getContext(), mAccountType, mAccountEmail)
+        CloudManager.getService(getContext(), mAccountType, mAccountEmail, getActivity())
                 .getAccountDetailsTask(new CloudService.GetAccountDetailsCallback() {
                     @Override
                     public void onComplete(CloudService.AccountDetails details) {

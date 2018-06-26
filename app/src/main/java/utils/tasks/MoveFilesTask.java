@@ -1,6 +1,7 @@
 package utils.tasks;
 
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 
@@ -35,10 +36,11 @@ public class MoveFilesTask implements CloudRequestTask {
     }
 
     public MoveFilesTask(CloudService destService, CloudResource sourceFile,
-                         boolean deleteOriginal, Context context,
+                         boolean deleteOriginal, Context context, Activity activity,
                          CloudService.MoveFilesCallback callback) {
         this.mSourceService = CloudManager.getService(context,
-                sourceFile.getAccountType().ordinal(), sourceFile.getAccountEmail());
+                sourceFile.getAccountType().ordinal(),
+                sourceFile.getAccountEmail(), activity);
         this.mDestService = destService;
         this.mSourceFile = sourceFile;
         this.mDeleteOriginal = deleteOriginal;

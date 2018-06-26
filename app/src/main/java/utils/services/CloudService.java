@@ -1,6 +1,7 @@
 package utils.services;
 
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -75,7 +76,7 @@ public interface CloudService {
     CloudRequestTask deleteFileTask(GenericCallback callback);
     CloudRequestTask uploadFileTask(File file, ProgressDialog dialog, GenericCallback callback);
     CloudRequestTask downloadFileTask(ProgressDialog dialog, boolean saveTmp, DownloadFileCallback callback);
-    CloudRequestTask moveFilesTask(CloudResource sourceFile, Context context, boolean deleteOriginal, MoveFilesCallback callback);
+    CloudRequestTask moveFilesTask(CloudResource sourceFile, Context context, Activity activity, boolean deleteOriginal, MoveFilesCallback callback);
     CloudRequestTask getAccountDetailsTask(GetAccountDetailsCallback callback);
     CloudRequestTask getFileDetailsTask(ProgressDialog dialog, GetFileDetailsCallback callback);
 }

@@ -73,7 +73,7 @@ public class FilesFragment extends Fragment {
     private static SavedFile mSavedFile = null;
 
     private CloudService getService() {
-        return CloudManager.getService(getContext(), mAccountType, mAccountEmail);
+        return CloudManager.getService(getContext(), mAccountType, mAccountEmail, getActivity());
     }
 
     @Override
@@ -282,7 +282,7 @@ public class FilesFragment extends Fragment {
             return;
         }
 
-        getService().moveFilesTask(mSavedFile.file, getContext(),
+        getService().moveFilesTask(mSavedFile.file, getContext(), getActivity(),
                 mSavedFile.deleteOriginal, new CloudService.MoveFilesCallback() {
             @Override
             public void onComplete(MoveFilesTask.Statistics stats) {
