@@ -76,6 +76,11 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
+            Fragment fragment = new AccountsFragment();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.contentFrame, fragment);
+            ft.commit();
+            
             return true;
         }
 
