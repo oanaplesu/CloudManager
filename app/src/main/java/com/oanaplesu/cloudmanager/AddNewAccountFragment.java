@@ -30,7 +30,6 @@ import com.google.api.services.drive.DriveScopes;
 import com.onedrive.sdk.authentication.MSAAuthenticator;
 import com.onedrive.sdk.concurrency.ICallback;
 import com.onedrive.sdk.core.ClientException;
-import com.onedrive.sdk.core.DefaultClientConfig;
 import com.onedrive.sdk.core.IClientConfig;
 import com.onedrive.sdk.extensions.IOneDriveClient;
 import com.onedrive.sdk.extensions.OneDriveClient;
@@ -45,7 +44,6 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.List;
 
 import utils.db.AppDatabase;
 import utils.db.DropboxUser;
@@ -54,7 +52,7 @@ import utils.db.OneDriveUser;
 import utils.services.OneDriveService;
 
 import static android.content.Context.MODE_PRIVATE;
-import static com.onedrive.sdk.core.DefaultClientConfig.*;
+import static com.onedrive.sdk.core.DefaultClientConfig.createWithAuthenticator;
 
 
 public class AddNewAccountFragment extends Fragment {

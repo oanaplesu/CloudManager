@@ -1,27 +1,17 @@
 package utils.tasks.onedrive;
 
 import android.app.ProgressDialog;
-import android.os.AsyncTask;
 
-import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.CreateFolderErrorException;
-import com.dropbox.core.v2.files.CreateFolderResult;
-import com.dropbox.core.v2.files.Metadata;
 import com.onedrive.sdk.concurrency.ICallback;
 import com.onedrive.sdk.core.ClientException;
 import com.onedrive.sdk.extensions.Folder;
-import com.onedrive.sdk.extensions.IDriveRequestBuilder;
 import com.onedrive.sdk.extensions.IItemRequestBuilder;
 import com.onedrive.sdk.extensions.Item;
 
-import java.util.List;
-
 import utils.cloud.AccountType;
 import utils.cloud.CloudResource;
-import utils.exceptions.DropboxUniqueFolderNameException;
 import utils.services.CloudService;
 import utils.services.OneDriveService;
-import utils.tasks.CloudRequestTask;
 
 public class CreateFolderOneDriveTask extends OneDriveRequestTask {
     private ProgressDialog mDialog;

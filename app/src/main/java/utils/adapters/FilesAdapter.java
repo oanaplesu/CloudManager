@@ -1,9 +1,7 @@
 package utils.adapters;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.support.v7.view.menu.MenuBuilder;
 import android.support.v7.widget.RecyclerView;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;

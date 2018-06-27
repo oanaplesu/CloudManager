@@ -27,25 +27,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.commons.io.FileUtils;
 
-import utils.cloud.CloudResource;
-import utils.services.CloudManager;
-import utils.services.CloudService;
-import utils.exceptions.DropboxUniqueFolderNameException;
-import utils.misc.FileAction;
-import utils.adapters.FilesAdapter;
-import utils.misc.UriHelpers;
-import utils.tasks.MoveFilesTask;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+
+import utils.adapters.FilesAdapter;
+import utils.cloud.CloudResource;
+import utils.exceptions.DropboxUniqueFolderNameException;
+import utils.misc.FileAction;
+import utils.misc.UriHelpers;
+import utils.services.CloudManager;
+import utils.services.CloudService;
+import utils.tasks.MoveFilesTask;
 
 import static android.app.Activity.RESULT_OK;
 import static android.view.MenuItem.SHOW_AS_ACTION_ALWAYS;

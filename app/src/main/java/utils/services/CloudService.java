@@ -5,18 +5,10 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.support.design.internal.BottomNavigationItemView;
 
 import java.io.File;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 
-import utils.cloud.AccountType;
 import utils.cloud.CloudResource;
 import utils.tasks.CloudRequestTask;
 import utils.tasks.MoveFilesTask;

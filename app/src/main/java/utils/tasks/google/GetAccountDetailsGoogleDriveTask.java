@@ -8,7 +8,6 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.About;
 import com.google.api.services.drive.model.User;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 import utils.services.CloudService;

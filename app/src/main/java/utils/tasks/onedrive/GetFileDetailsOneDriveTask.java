@@ -1,29 +1,17 @@
 package utils.tasks.onedrive;
 
 import android.app.ProgressDialog;
-import android.os.AsyncTask;
-import android.util.Log;
 
-import com.dropbox.core.DbxException;
-import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.FileMetadata;
-import com.dropbox.core.v2.files.FolderMetadata;
-import com.dropbox.core.v2.files.Metadata;
 import com.onedrive.sdk.concurrency.ICallback;
 import com.onedrive.sdk.core.ClientException;
 import com.onedrive.sdk.extensions.Item;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 import utils.cloud.CloudResource;
 import utils.services.CloudService;
 import utils.services.OneDriveService;
-import utils.tasks.CloudRequestTask;
 
 
 public class GetFileDetailsOneDriveTask extends OneDriveRequestTask {

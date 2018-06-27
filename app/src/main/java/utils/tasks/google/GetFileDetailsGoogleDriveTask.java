@@ -1,29 +1,17 @@
 package utils.tasks.google;
 
 import android.app.ProgressDialog;
-import android.graphics.BitmapFactory;
-import android.media.MediaDescrambler;
 import android.os.AsyncTask;
-import android.widget.ProgressBar;
 
-import com.fasterxml.jackson.core.format.DataFormatDetector;
-import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.model.About;
 import com.google.api.services.drive.model.File;
-import com.google.api.services.drive.model.User;
-import com.google.common.hash.HashCode;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
 
 import utils.services.CloudService;
 import utils.tasks.CloudRequestTask;

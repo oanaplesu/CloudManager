@@ -3,27 +3,18 @@ package utils.tasks.onedrive;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Environment;
-import android.view.MenuItem;
 
-import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.FileMetadata;
-import com.google.api.client.util.IOUtils;
 import com.onedrive.sdk.concurrency.ICallback;
 import com.onedrive.sdk.core.ClientException;
-import com.onedrive.sdk.extensions.IItemRequestBuilder;
 
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 import utils.services.CloudService;
 import utils.services.OneDriveService;
-import utils.tasks.CloudRequestTask;
 
 
 public class DownloadFileOneDriveTask extends OneDriveRequestTask {

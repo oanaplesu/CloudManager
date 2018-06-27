@@ -13,18 +13,16 @@ import com.google.api.services.drive.DriveScopes;
 
 import java.io.File;
 import java.util.Collections;
-import java.util.zip.CheckedOutputStream;
 
 import utils.cloud.CloudResource;
+import utils.tasks.CloudRequestTask;
 import utils.tasks.MoveFilesTask;
-import utils.tasks.dropbox.GetFileDetailsDropboxTask;
+import utils.tasks.google.CreateFolderGoogleDriveTask;
 import utils.tasks.google.DeleteFileGoogleDriveTask;
 import utils.tasks.google.DownloadFileGoogleDriveTask;
 import utils.tasks.google.GetAccountDetailsGoogleDriveTask;
 import utils.tasks.google.GetFileDetailsGoogleDriveTask;
 import utils.tasks.google.GetFilesFromGoogleDriveTask;
-import utils.tasks.CloudRequestTask;
-import utils.tasks.google.CreateFolderGoogleDriveTask;
 import utils.tasks.google.UploadFileGoogleDriveTask;
 
 public class GoogleDriveService implements CloudService {

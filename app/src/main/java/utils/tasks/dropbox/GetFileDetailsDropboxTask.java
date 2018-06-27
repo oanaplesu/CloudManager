@@ -1,7 +1,6 @@
 package utils.tasks.dropbox;
 
 import android.app.ProgressDialog;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -11,20 +10,13 @@ import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.Metadata;
 
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 import utils.cloud.CloudResource;
 import utils.services.CloudService;
 import utils.tasks.CloudRequestTask;
-
-import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 
 
 public class GetFileDetailsDropboxTask extends AsyncTask<String, Void, Void>

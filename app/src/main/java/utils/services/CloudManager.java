@@ -2,12 +2,10 @@ package utils.services;
 
 import android.app.Activity;
 import android.content.Context;
+
 import java.util.Objects;
 
 import utils.cloud.AccountType;
-import utils.cloud.CloudResource;
-
-import static utils.cloud.AccountType.*;
 
 public class CloudManager {
     private static CloudService mInstance = null;

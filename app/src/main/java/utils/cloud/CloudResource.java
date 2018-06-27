@@ -3,11 +3,6 @@ package utils.cloud;
 
 import android.webkit.MimeTypeMap;
 
-import com.facebook.stetho.inspector.console.CLog;
-import com.google.api.services.drive.model.File;
-
-import utils.adapters.AccountAdapter;
-
 public class CloudResource {
     public enum Type {
         FILE, FOLDER

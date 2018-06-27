@@ -2,11 +2,7 @@ package utils.tasks.onedrive;
 
 
 import android.app.ProgressDialog;
-import android.os.AsyncTask;
 
-import com.dropbox.core.DbxException;
-import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.WriteMode;
 import com.google.android.gms.common.util.IOUtils;
 import com.onedrive.sdk.concurrency.ICallback;
 import com.onedrive.sdk.core.ClientException;
@@ -14,13 +10,10 @@ import com.onedrive.sdk.extensions.IItemRequestBuilder;
 import com.onedrive.sdk.extensions.Item;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 import utils.services.CloudService;
 import utils.services.OneDriveService;
-import utils.tasks.CloudRequestTask;
 
 public class UploadFileOneDriveTask extends OneDriveRequestTask {
     private ProgressDialog mDialog;

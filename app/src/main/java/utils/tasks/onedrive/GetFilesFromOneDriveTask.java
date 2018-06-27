@@ -1,11 +1,9 @@
 package utils.tasks.onedrive;
 
 import android.app.ProgressDialog;
-import android.util.Log;
 
 import com.onedrive.sdk.concurrency.ICallback;
 import com.onedrive.sdk.core.ClientException;
-import com.onedrive.sdk.extensions.IDriveRequestBuilder;
 import com.onedrive.sdk.extensions.IItemCollectionPage;
 import com.onedrive.sdk.extensions.IItemRequestBuilder;
 import com.onedrive.sdk.extensions.Item;
@@ -17,7 +15,6 @@ import utils.cloud.AccountType;
 import utils.cloud.CloudResource;
 import utils.services.CloudService;
 import utils.services.OneDriveService;
-import utils.tasks.CloudRequestTask;
 
 public class GetFilesFromOneDriveTask extends OneDriveRequestTask {
     private ProgressDialog mDialog;

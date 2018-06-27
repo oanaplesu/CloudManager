@@ -1,15 +1,9 @@
 package utils.tasks.google;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.icu.text.LocaleDisplayNames;
 import android.os.AsyncTask;
 import android.os.Environment;
-import android.util.Log;
-import android.webkit.MimeTypeMap;
 
-import com.dropbox.core.v2.files.FileMetadata;
 import com.google.api.services.drive.Drive;
 
 import java.io.File;

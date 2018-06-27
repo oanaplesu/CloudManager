@@ -19,8 +19,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.facebook.stetho.inspector.console.CLog;
-
 import org.apache.commons.io.FileUtils;
 
 import utils.cloud.AccountType;

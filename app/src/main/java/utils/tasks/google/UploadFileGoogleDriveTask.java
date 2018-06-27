@@ -3,13 +3,11 @@ package utils.tasks.google;
 
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
-
 
 import java.io.IOException;
 import java.util.Collections;

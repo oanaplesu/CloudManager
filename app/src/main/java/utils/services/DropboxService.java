@@ -2,7 +2,6 @@ package utils.services;
 
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 
@@ -23,7 +22,6 @@ import utils.tasks.dropbox.GetAccountDetailsDropboxTask;
 import utils.tasks.dropbox.GetFileDetailsDropboxTask;
 import utils.tasks.dropbox.GetFilesFromDropboxTask;
 import utils.tasks.dropbox.UploadFileDropboxTask;
-import utils.tasks.google.GetAccountDetailsGoogleDriveTask;
 
 
 public class DropboxService implements CloudService {

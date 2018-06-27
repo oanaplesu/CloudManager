@@ -2,33 +2,15 @@ package utils.tasks.onedrive;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.util.Log;
 
-import com.dropbox.core.DbxException;
-import com.dropbox.core.v2.DbxClientV2;
-import com.oanaplesu.cloudmanager.AddNewAccountFragment;
 import com.onedrive.sdk.concurrency.ICallback;
 import com.onedrive.sdk.core.ClientException;
 import com.onedrive.sdk.extensions.Drive;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
 import utils.db.AppDatabase;
 import utils.services.CloudService;
 import utils.services.OneDriveService;
-import utils.tasks.CloudRequestTask;
 
 
 public class GetAccountDetailsOneDriveTask extends OneDriveRequestTask {

@@ -2,7 +2,6 @@ package utils.tasks;
 
 import android.os.AsyncTask;
 
-
 import utils.db.AppDatabase;
 
 public class DeleteAccountTask extends AsyncTask<String, Void, Void> {

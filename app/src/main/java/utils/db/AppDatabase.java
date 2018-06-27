@@ -1,10 +1,9 @@
 package utils.db;
 
-import android.content.Context;
-
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
+import android.content.Context;
 
 
 @Database(entities = {GoogleDriveUser.class, DropboxUser.class, OneDriveUser.class}, version = 17, exportSchema = false)
